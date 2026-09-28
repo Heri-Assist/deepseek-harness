@@ -1716,6 +1716,9 @@ importers:
       '@deepseek-ai/schemastery':
         specifier: link:../../../vendor/schemastery
         version: link:../../../vendor/schemastery
+      picomatch:
+        specifier: ^4.0.4
+        version: 4.0.4
       zod:
         specifier: ^4.4.3
         version: 4.4.3
@@ -1741,6 +1744,9 @@ importers:
       '@deepseek-ai/dsh-workspace':
         specifier: workspace:*
         version: link:../../workspace/workspace
+      '@types/picomatch':
+        specifier: ^3.0.2
+        version: 3.0.2
 
   packages/boot/app-boot:
     dependencies:

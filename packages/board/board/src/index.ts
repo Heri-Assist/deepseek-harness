@@ -171,6 +171,7 @@ export class BoardService extends Service {
         updatedAt: now,
         ...input.description === undefined ? {} : { description: input.description },
         ...input.createdBy === undefined ? {} : { createdBy: input.createdBy },
+        ...input.execution === undefined ? {} : { execution: input.execution },
       }
       assertGraph([...all, task])
       domain.table('tasks').put(task.id, task)
@@ -242,6 +243,7 @@ export class BoardService extends Service {
       updatedAt: new Date().toISOString(),
       ...input.description === undefined ? {} : { description: input.description },
       ...input.assignee === undefined ? {} : { assignee: input.assignee },
+      ...input.execution === undefined ? {} : { execution: input.execution },
     }
     const all = (await this.tasks()).map(task => task.id === next.id ? next : task)
     assertGraph(all)

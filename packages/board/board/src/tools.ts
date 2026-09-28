@@ -215,6 +215,29 @@ export function registerBoardTools(ctx: Context, board: BoardService): () => voi
     presentCall: () => ({ card: 'generic', title: 'Claim board task', kind: 'other' }),
   }))
 
+  const merge = ctx.tools.register(defineTool({
+    name: 'board_merge',
+    description: 'Mark a reviewed board task done, recording that its branch was integrated. Pass the current revision.',
+    parameters: {
+      id: { type: 'string', required: true, description: 'Task id.' },
+      revision: { type: 'integer', required: true, description: 'Current revision from the last read.' },
+      notes: { type: 'string', description: 'Optional integration note recorded on the task.' },
+    },
+    output: TASK_OUTPUT,
+    async execute(args) {
+      const current = await board.get(BoardTaskId(args.id))
+      return view(await board.update({
+        id: BoardTaskId(args.id),
+        revision: args.revision,
+        status: 'done',
+        ...args.notes === undefined || current.execution === undefined
+          ? {}
+          : { execution: { ...current.execution, mergeNotes: args.notes } },
+      }))
+    },
+    presentCall: () => ({ card: 'generic', title: 'Merge board task', kind: 'other' }),
+  }))
+
   return () => {
     create()
     list()
@@ -222,5 +245,6 @@ export function registerBoardTools(ctx: Context, board: BoardService): () => voi
     update()
     complete()
     claim()
+    merge()
   }
 }

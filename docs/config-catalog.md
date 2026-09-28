@@ -469,6 +469,8 @@ export interface Config {
   branchPrefix?: string
   /** Dispatch automatically on every committed board change; defaults to false. */
   auto?: boolean
+  /** Attempts allowed per task before a failure leaves it `blocked`; defaults to 1. */
+  maxAttempts?: number
 }
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-board-executor -->

@@ -42,12 +42,14 @@ export interface DispatchOptions {
   readonly maxConcurrent: number
   /** Whether each task runs in its own worktree. */
   readonly useWorktrees: boolean
+  /** Attempts allowed per task before a failure leaves it `blocked`; defaults to 1. */
+  readonly maxAttempts?: number
   /** Explicit parent agent; otherwise each task's creator session is resolved. */
   readonly parent?: Agent
   /** Cancellation signal forwarded to every started run. */
   readonly signal: AbortSignal
   /** Worktree creator; required when `useWorktrees` is true. */
-  readonly createWorktree?: (taskId: string, workspace: string) => Promise<{ path: string }>
+  readonly createWorktree?: (taskId: string, workspace: string) => Promise<{ path: string; branch: string }>
 }
 
 /** Which tasks started and which were skipped for lack of a parent. */
@@ -56,6 +58,8 @@ export interface DispatchOutcome {
   readonly started: string[]
   /** Task ids skipped because no live parent agent could be resolved. */
   readonly skipped: string[]
+  /** Task ids whose start failed and were released as `blocked`. */
+  readonly blocked: string[]
 }
 
 /**
@@ -69,6 +73,7 @@ export async function runDispatch(ports: DispatchPorts, options: DispatchOptions
   const planned = planDispatch(tasks, options.maxConcurrent)
   const started: string[] = []
   const skipped: string[] = []
+  const blocked: string[] = []
   for (const task of planned) {
     const parent = options.parent ?? (task.createdBy === undefined ? undefined : ports.resolveAgent(task.createdBy))
     if (parent === undefined) {
@@ -90,23 +95,34 @@ export async function runDispatch(ports: DispatchPorts, options: DispatchOptions
         ...cwd === undefined ? {} : { cwd },
       })
       started.push(task.id)
-      void settle(ports, task.id, run)
+      void settle(ports, task.id, run, options.maxAttempts ?? 1)
     } catch {
       // A start failure has no run to settle: release the claimed task as blocked.
       const current = await ports.get(task.id)
       await ports.update({ id: task.id, revision: current.revision, status: 'blocked' })
-      skipped.push(task.id)
+      blocked.push(task.id)
     }
   }
-  return { started, skipped }
+  return { started, skipped, blocked }
 }
 
 /** Move one dispatched task to `review` on success or `blocked` on failure. */
-async function settle(ports: DispatchPorts, id: BoardTask['id'], run: SubagentRun): Promise<void> {
+async function settle(ports: DispatchPorts, id: BoardTask['id'], run: SubagentRun, maxAttempts: number): Promise<void> {
   const result = await run.result
   const current = await ports.get(id)
-  const status = result.stopReason === 'completed' ? 'review' : 'blocked'
-  await ports.update({ id, revision: current.revision, status })
+  if (result.stopReason === 'completed') {
+    await ports.update({ id, revision: current.revision, status: 'review' })
+    return
+  }
+  const attempts = (current.execution?.attempts ?? 0) + 1
+  // A failed run retries while the attempt budget allows; past it the task stays blocked for a human.
+  const status = attempts < maxAttempts ? 'backlog' : 'blocked'
+  await ports.update({
+    id,
+    revision: current.revision,
+    status,
+    execution: { ...current.execution, attempts },
+  })
 }
 
 /** Options for one automatic pass over every board workspace. */
@@ -124,6 +140,7 @@ export interface AutoOptions extends Omit<DispatchOptions, 'workspaceId' | 'work
 export async function runAuto(ports: DispatchPorts, options: AutoOptions): Promise<DispatchOutcome> {
   const started: string[] = []
   const skipped: string[] = []
+  const blocked: string[] = []
   const { workspacePath, ...base } = options
   for (const workspaceId of await ports.listWorkspaces()) {
     let path: string | undefined
@@ -138,6 +155,7 @@ export async function runAuto(ports: DispatchPorts, options: AutoOptions): Promi
     })
     started.push(...outcome.started)
     skipped.push(...outcome.skipped)
+    blocked.push(...outcome.blocked)
   }
-  return { started, skipped }
+  return { started, skipped, blocked }
 }

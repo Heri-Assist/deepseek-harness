@@ -43,6 +43,7 @@ Mount it beside [`@deepseek-ai/dsh-board`](../board/README.md) and a subagent pr
 | `worktreeRoot` | `$DSH_HOME/worktrees` | Directory holding created worktrees |
 | `branchPrefix` | `board/` | Branch-name prefix for created worktrees |
 | `auto` | `false` | Dispatch automatically on every committed board change |
+| `maxAttempts` | `1` | Attempts allowed per task before a failure leaves it `blocked` |
 
 The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-board-executor) is the exhaustive source for the accepted fields.
 
@@ -62,7 +63,7 @@ With `auto: true` (which requires a configured `provider`), the executor subscri
 <details>
 <summary>Maintainer details — click to expand</summary>
 
-`planDispatch` is a pure function: it filters ready tasks (status `backlog`, every blocker `done`), orders them by priority then age, and admits each while the in-progress budget allows and its write scopes do not overlap a running or already-selected task. An empty scope set is treated as unknown and conflicts with everything. `runDispatch` then claims each selected task, creates a worktree when isolation is on, starts the run with `cwd` set to that worktree, and settles the task on completion. `WorktreeManager` shells out to `git worktree`. No invariant companion is published because the dispatcher contains each pass's failure.
+`planDispatch` is a pure function: it filters ready tasks (status `backlog`, every blocker `done`), orders them by priority then age, and admits each while the in-progress budget allows and its write scopes do not overlap a running or already-selected task. An empty scope set is treated as unknown and conflicts with everything; a literal scope is tested against the other's glob, and two globs conflict when either static prefix contains the other's. `runDispatch` then claims each selected task, creates a worktree when isolation is on, starts the run with `cwd` set to that worktree, and settles the task on completion. `WorktreeManager` shells out to `git worktree`. No invariant companion is published because the dispatcher contains each pass's failure.
 
 | File | Role |
 |---|---|
@@ -98,7 +99,7 @@ Indirect: each child's cache behavior belongs to its own provider; the dispatche
 <a id="known-limitations-and-deferred-work"></a>
 
 - Automatic dispatch resolves each workspace's repository path from the workspace registry; a workspace with no registered path is skipped while worktrees are enabled. Without `auto`, dispatch is host-called only.
-- A finished worktree is kept for review and never merged; integration and cleanup are manual.
+- A task's worktree is kept for review; merging it back is a separate, explicit step, and a conflicted merge is left in place for a human.
 - Write scopes are compared as exact strings; a glob-aware overlap check is deferred.
 - A failed or cancelled run marks its task `blocked`; there is no retry policy or attempt counter yet.
 

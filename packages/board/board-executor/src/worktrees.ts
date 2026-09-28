@@ -71,4 +71,25 @@ export class WorktreeManager {
     const { stdout } = await execFileAsync('git', ['-C', workspace, 'worktree', 'list', '--porcelain'])
     return stdout.split('\n').filter(line => line.startsWith('worktree ')).map(line => line.slice('worktree '.length))
   }
+
+  /**
+   * Merge one task's branch into the repository's current branch, then remove
+   * its worktree. A conflict aborts the merge and leaves both the branch and
+   * the worktree in place for a human.
+   * @param ref - the worktree returned by {@link create}.
+   * @param workspace - the repository the worktree belongs to.
+   * @throws when the merge conflicts or the repository is not a clean checkout.
+   */
+  async merge(ref: WorktreeRef, workspace: string): Promise<void> {
+    await execFileAsync('git', ['-C', workspace, 'merge', '--no-edit', ref.branch])
+    await this.remove(ref.path, workspace)
+  }
+
+  /**
+   * Abort an in-progress merge in one repository, restoring its pre-merge state.
+   * @param workspace - the repository to reset.
+   */
+  async abortMerge(workspace: string): Promise<void> {
+    await execFileAsync('git', ['-C', workspace, 'merge', '--abort'])
+  }
 }

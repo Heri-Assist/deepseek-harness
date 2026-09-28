@@ -41,7 +41,7 @@ kind: "package-reference"
 
 ### 每次调用的行为
 
-`board_create` 添加一个 `backlog` 任务。`board_list` 读取一个看板，可选只返回就绪任务。`board_get` 按 id 读取一个任务。`board_update`、`board_complete` 与 `board_claim` 修改一个任务并要求当前修订号；过期修订会失败，调用方必须重新读取。依赖环、缺失的阻塞任务、自阻塞以及超过上限的写入都会在存储之前被拒绝。
+`board_create` 添加一个 `backlog` 任务。`board_list` 读取一个看板，可选只返回就绪任务。`board_get` 按 id 读取一个任务。`board_update`、`board_complete`、`board_claim` 与 `board_merge` 修改一个任务并要求当前修订号；过期修订会失败，调用方必须重新读取。`board_merge` 把已审查任务关闭为 `done`，并可记录集成说明。依赖环、缺失的阻塞任务、自阻塞以及超过上限的写入都会在存储之前被拒绝。
 
 -----
 

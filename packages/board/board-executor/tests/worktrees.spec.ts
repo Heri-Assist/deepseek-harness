@@ -43,4 +43,38 @@ describe('WorktreeManager', () => {
     await manager.remove(ref.path, repo)
     expect(existsSync(ref.path)).toBe(false)
   }, 30_000)
+
+  it('merges a task branch back into the repository and removes its worktree', async () => {
+    const repo = await gitRepo()
+    const root = await mkdtemp(join(tmpdir(), 'dsh-wt-merge-'))
+    roots.push(root)
+    const manager = new WorktreeManager(root)
+
+    const ref = await manager.create('task-merge', repo)
+    await writeFile(join(ref.path, 'work.txt'), 'from the task\n')
+    await execFileAsync('git', ['-C', ref.path, 'add', '.'])
+    await execFileAsync('git', ['-C', ref.path, 'commit', '-m', 'task work'])
+
+    await manager.merge(ref, repo)
+    expect(existsSync(join(repo, 'work.txt'))).toBe(true)
+    expect(existsSync(ref.path)).toBe(false)
+  }, 30_000)
+
+  it('leaves a conflicted merge in place so a human resolves it', async () => {
+    const repo = await gitRepo()
+    const root = await mkdtemp(join(tmpdir(), 'dsh-wt-conflict-'))
+    roots.push(root)
+    const manager = new WorktreeManager(root)
+
+    const ref = await manager.create('task-conflict', repo)
+    await writeFile(join(ref.path, 'README.md'), 'task version\n')
+    await execFileAsync('git', ['-C', ref.path, 'commit', '-am', 'task edit'])
+    await writeFile(join(repo, 'README.md'), 'main version\n')
+    await execFileAsync('git', ['-C', repo, 'commit', '-am', 'main edit'])
+
+    await expect(manager.merge(ref, repo)).rejects.toThrow()
+    expect(existsSync(join(ref.path, 'README.md'))).toBe(true)
+    await manager.abortMerge(repo)
+    expect((await manager.list(repo)).map(path => realpathSync(path))).toContain(realpathSync(ref.path))
+  }, 30_000)
 })

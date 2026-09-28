@@ -41,7 +41,7 @@ The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-a
 
 ### What each call does
 
-`board_create` adds a `backlog` task. `board_list` reads a board, optionally only the ready tasks. `board_get` reads one by id. `board_update`, `board_complete`, and `board_claim` change one task and require the current revision; a stale revision fails and the caller must re-read. A dependency cycle, a missing blocker, a self-block, and a write past the cap are rejected before anything is stored.
+`board_create` adds a `backlog` task. `board_list` reads a board, optionally only the ready tasks. `board_get` reads one by id. `board_update`, `board_complete`, `board_claim`, and `board_merge` change one task and require the current revision; a stale revision fails and the caller must re-read. `board_merge` closes a reviewed task as `done` and can record an integration note. A dependency cycle, a missing blocker, a self-block, and a write past the cap are rejected before anything is stored.
 
 -----
 

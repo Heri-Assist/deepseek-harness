@@ -82,10 +82,10 @@ describe('runDispatch', () => {
       parent: agent('parent'), signal: new AbortController().signal,
     })
     await tick()
-    expect(outcome).toEqual({ started: [String(tasks[0]?.id)], skipped: [] })
+    expect(outcome).toEqual({ started: [String(tasks[0]?.id)], skipped: [], blocked: [] })
     expect(record.claims).toEqual([String(tasks[0]?.id)])
     expect(record.starts).toHaveLength(1)
-    expect(record.updates).toEqual([{ id: tasks[0]?.id, revision: 1, status: 'review' }])
+    expect(record.updates[0]).toMatchObject({ id: tasks[0]?.id, revision: 1, status: 'review' })
   })
 
   it('marks a failed run blocked', async () => {
@@ -99,6 +99,18 @@ describe('runDispatch', () => {
     expect(record.updates[0]?.status).toBe('blocked')
   })
 
+  it('retries a failed run as backlog while the attempt budget allows', async () => {
+    const tasks = [task('a')]
+    const record = recorder(tasks, () => agent('parent'), 'error')
+    await runDispatch(record.ports, {
+      workspaceId: 'ws-1', provider: 'test', maxConcurrent: 1, useWorktrees: false, maxAttempts: 3,
+      parent: agent('parent'), signal: new AbortController().signal,
+    })
+    await tick()
+    expect(record.updates[0]?.status).toBe('backlog')
+    expect(record.updates[0]?.execution?.attempts).toBe(1)
+  })
+
   it('skips a task whose creator session has no live agent', async () => {
     const tasks = [task('a', { createdBy: SessionId('gone') })]
     const record = recorder(tasks, () => undefined)
@@ -106,7 +118,7 @@ describe('runDispatch', () => {
       workspaceId: 'ws-1', provider: 'test', maxConcurrent: 1, useWorktrees: false,
       signal: new AbortController().signal,
     })
-    expect(outcome).toEqual({ started: [], skipped: [String(tasks[0]?.id)] })
+    expect(outcome).toEqual({ started: [], skipped: [String(tasks[0]?.id)], blocked: [] })
     expect(record.claims).toEqual([])
   })
 
@@ -116,7 +128,7 @@ describe('runDispatch', () => {
     await runDispatch(record.ports, {
       workspaceId: 'ws-1', provider: 'test', maxConcurrent: 1, useWorktrees: true,
       workspacePath: '/repo', parent: agent('parent'), signal: new AbortController().signal,
-      createWorktree: () => Promise.resolve({ path: '/worktrees/a' }),
+      createWorktree: () => Promise.resolve({ path: '/worktrees/a', branch: 'board/a' }),
     })
     await tick()
     expect(record.starts[0]?.cwd).toBe('/worktrees/a')
@@ -129,7 +141,7 @@ describe('runDispatch', () => {
       workspaceId: 'ws-1', provider: 'test', maxConcurrent: 1, useWorktrees: false,
       parent: agent('parent'), signal: new AbortController().signal,
     })
-    expect(outcome).toEqual({ started: [String(tasks[0]?.id)], skipped: [] })
+    expect(outcome).toEqual({ started: [String(tasks[0]?.id)], skipped: [], blocked: [] })
     const prompt = record.starts[0]?.prompt.flatMap(block => block.type === 'text' ? [block.text] : []).join('')
     expect(prompt).toContain('extra detail')
   })
@@ -140,7 +152,7 @@ describe('runDispatch', () => {
     await runDispatch(record.ports, {
       workspaceId: 'ws-1', provider: 'test', maxConcurrent: 1, useWorktrees: true,
       parent: agent('parent'), signal: new AbortController().signal,
-      createWorktree: () => Promise.resolve({ path: '/worktrees/a' }),
+      createWorktree: () => Promise.resolve({ path: '/worktrees/a', branch: 'board/a' }),
     })
     expect(record.starts[0]?.cwd).toBeUndefined()
 
@@ -149,7 +161,7 @@ describe('runDispatch', () => {
       workspaceId: 'ws-1', provider: 'test', maxConcurrent: 1, useWorktrees: false,
       signal: new AbortController().signal,
     })
-    expect(outcome).toEqual({ started: [], skipped: [String(BoardTaskId('b'))] })
+    expect(outcome).toEqual({ started: [], skipped: [String(BoardTaskId('b'))], blocked: [] })
   })
 })
 
@@ -172,7 +184,7 @@ describe('runAuto', () => {
       provider: 'test', maxConcurrent: 1, useWorktrees: true,
       parent: agent('parent'), signal: new AbortController().signal,
       workspacePath: workspaceId => workspaceId === 'known' ? '/repo' : undefined,
-      createWorktree: () => Promise.resolve({ path: '/worktrees/a' }),
+      createWorktree: () => Promise.resolve({ path: '/worktrees/a', branch: 'board/a' }),
     })
     await tick()
     expect(outcome.started).toEqual([String(tasks[0]?.id)])
@@ -186,7 +198,7 @@ describe('runAuto', () => {
       provider: 'test', maxConcurrent: 1, useWorktrees: true,
       parent: agent('parent'), signal: new AbortController().signal,
     })
-    expect(outcome).toEqual({ started: [], skipped: [] })
+    expect(outcome).toEqual({ started: [], skipped: [], blocked: [] })
     expect(record.starts).toHaveLength(0)
   })
 })

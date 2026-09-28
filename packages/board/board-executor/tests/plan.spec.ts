@@ -33,6 +33,17 @@ describe('scopesOverlap', () => {
     expect(scopesOverlap(['src/a.ts', 'src/b.ts'], ['src/b.ts'])).toBe(true)
     expect(scopesOverlap(['src/a.ts'], ['src/b.ts'])).toBe(false)
   })
+
+  it('treats a literal and a matching glob as conflicting', () => {
+    expect(scopesOverlap(['src/**'], ['src/a/b.ts'])).toBe(true)
+    expect(scopesOverlap(['src/a/b.ts'], ['src/**'])).toBe(true)
+    expect(scopesOverlap(['src/**'], ['test/a.ts'])).toBe(false)
+  })
+
+  it('treats two globs as conflicting when one static prefix contains the other', () => {
+    expect(scopesOverlap(['src/**/*.ts'], ['src/a/*.ts'])).toBe(true)
+    expect(scopesOverlap(['src/**/*.ts'], ['test/**/*.ts'])).toBe(false)
+  })
 })
 
 describe('planDispatch', () => {

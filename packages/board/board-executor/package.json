@@ -30,6 +30,7 @@
   "license": "MIT",
   "dependencies": {
     "@deepseek-ai/schemastery": "workspace:~",
+    "picomatch": "^4.0.4",
     "zod": "^4.4.3"
   },
   "peerDependencies": {
@@ -48,6 +49,7 @@
     "@deepseek-ai/dsh-home-paths": "workspace:*",
     "@deepseek-ai/dsh-session": "workspace:*",
     "@deepseek-ai/dsh-subagent": "workspace:*",
-    "@deepseek-ai/dsh-workspace": "workspace:*"
+    "@deepseek-ai/dsh-workspace": "workspace:*",
+    "@types/picomatch": "^3.0.2"
   }
 }

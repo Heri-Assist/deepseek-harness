@@ -43,6 +43,7 @@ kind: "package-reference"
 | `worktreeRoot` | `$DSH_HOME/worktrees` | 存放所创建工作树的目录 |
 | `branchPrefix` | `board/` | 所创建工作树的分支名前缀 |
 | `auto` | `false` | 在每次已提交的看板变更时自动派发 |
+| `maxAttempts` | `1` | 失败任务在被置为 `blocked` 前允许的尝试次数 |
 
 生成式[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-board-executor)是这些已接受字段的详尽来源。
 
@@ -62,7 +63,7 @@ kind: "package-reference"
 <details>
 <summary>维护者细节——点击展开</summary>
 
-`planDispatch` 是纯函数：过滤就绪任务（状态为 `backlog` 且所有阻塞任务为 `done`），按优先级再按时间排序，并在进行中预算允许且写入范围不与运行中或已选中任务重叠时接纳。空 scope 集合视为未知，会与一切冲突。随后 `runDispatch` 认领每个被选中的任务，在开启隔离时创建工作树，以该工作树作为 `cwd` 启动运行，并在完成时结算任务。`WorktreeManager` 通过 shell 调用 `git worktree`。不发布 invariant 伴随包，因为派发器收容每次派发的失败。
+`planDispatch` 是纯函数：过滤就绪任务（状态为 `backlog` 且所有阻塞任务为 `done`），按优先级再按时间排序，并在进行中预算允许且写入范围不与运行中或已选中任务重叠时接纳。空 scope 集合视为未知，会与一切冲突；字面 scope 会与该 glob 比对，而两个 glob 在任一静态前缀包含另一个时冲突。随后 `runDispatch` 认领每个被选中的任务，在开启隔离时创建工作树，以该工作树作为 `cwd` 启动运行，并在完成时结算任务。`WorktreeManager` 通过 shell 调用 `git worktree`。不发布 invariant 伴随包，因为派发器收容每次派发的失败。
 
 | 文件 | 作用 |
 |---|---|
@@ -98,7 +99,7 @@ Indirect: each child's cache behavior belongs to its own provider; the dispatche
 <a id="known-limitations-and-deferred-work"></a>
 
 - 自动派发从 workspace 注册表解析每个 workspace 的仓库路径；启用 worktrees 时会跳过没有已注册路径的 workspace。未开启 `auto` 时，派发只能由宿主调用。
-- 完成的工作树会保留以供审查，从不合并；集成与清理是手动的。
+- 任务的 worktree 会保留以供审查；合并回主分支是单独的显式步骤，冲突的合并会原样保留给人工处理。
 - 写入范围按精确字符串比较；glob 感知的重叠检查被推迟。
 - 失败或取消的运行把任务置为 `blocked`；目前没有重试策略或尝试计数。
 

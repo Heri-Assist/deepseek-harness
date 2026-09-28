@@ -42,6 +42,18 @@ export interface BoardAssignee {
   readonly label?: string | undefined
 }
 
+/** Execution bookkeeping written by a dispatcher; absent until a task is dispatched. */
+export interface BoardExecution {
+  /** Failed attempts recorded so far. */
+  readonly attempts: number
+  /** Absolute worktree path of the latest run, when isolation was used. */
+  readonly worktreePath?: string | undefined
+  /** Branch checked out in the latest run's worktree. */
+  readonly branch?: string | undefined
+  /** Optional integration note recorded when a reviewed task is merged. */
+  readonly mergeNotes?: string | undefined
+}
+
 /** One durable task on a project board. */
 export interface BoardTask {
   /** Stable identity. */
@@ -68,6 +80,8 @@ export interface BoardTask {
   readonly assignee?: BoardAssignee | undefined
   /** Session that created the task; the dispatcher resolves it as the parent agent. */
   readonly createdBy?: SessionId | undefined
+  /** Dispatcher-written execution state. */
+  readonly execution?: BoardExecution | undefined
   /** Creation instant, ISO-8601 with millisecond precision. */
   readonly createdAt: string
   /** Last mutation instant. */
@@ -92,6 +106,8 @@ export interface BoardCreateInput {
   readonly writeScopes?: readonly string[]
   /** Session creating the task; the dispatcher uses it to resolve a parent agent. */
   readonly createdBy?: SessionId
+  /** Optional dispatcher execution state recorded at creation. */
+  readonly execution?: BoardExecution
 }
 
 /** Input to `update`; every listed field replaces the stored one. */
@@ -116,6 +132,8 @@ export interface BoardUpdateInput {
   readonly writeScopes?: readonly string[]
   /** Replacement owner. */
   readonly assignee?: BoardAssignee
+  /** Replacement dispatcher execution state. */
+  readonly execution?: BoardExecution
 }
 
 /** Input to `list`. */

@@ -18,6 +18,13 @@ const assigneeSchema = z.object({
   label: z.string().min(1).optional(),
 }).strict()
 
+const executionSchema = z.object({
+  attempts: z.number().int().nonnegative(),
+  worktreePath: z.string().min(1).optional(),
+  branch: z.string().min(1).optional(),
+  mergeNotes: z.string().min(1).optional(),
+}).strict()
+
 /** Durable task value; malformed rows reject opening the domain. */
 export const boardTaskSchema = z.object({
   id: z.string().min(1).transform(BoardTaskId),
@@ -31,6 +38,7 @@ export const boardTaskSchema = z.object({
   blockedBy: z.array(z.string().min(1).transform(BoardTaskId)),
   writeScopes: z.array(z.string().min(1)),
   createdBy: z.string().min(1).transform(SessionId).optional(),
+  execution: executionSchema.optional(),
   assignee: assigneeSchema.optional(),
   createdAt: z.string(),
   updatedAt: z.string(),

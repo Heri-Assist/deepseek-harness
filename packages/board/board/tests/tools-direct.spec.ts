@@ -113,6 +113,26 @@ describe('board tools direct input paths', () => {
     expect(ctx.tools.get('board_update')?.presentCall?.({ id: 'x', revision: 1 })).toMatchObject({ title: 'Update board task' })
     expect(ctx.tools.get('board_complete')?.presentCall?.({ id: 'x', revision: 1 })).toMatchObject({ title: 'Complete board task' })
     expect(ctx.tools.get('board_claim')?.presentCall?.({ id: 'x', revision: 1 })).toMatchObject({ title: 'Claim board task' })
+    expect(ctx.tools.get('board_merge')?.presentCall?.({ id: 'x', revision: 1 })).toMatchObject({ title: 'Merge board task' })
+  })
+
+  it('merges a reviewed task with and without execution notes', async () => {
+    const ctx = await harness()
+    const task = await ctx.board.create({ workspaceId: WorkspaceId('ws-1'), title: 'Review', execution: { attempts: 0, branch: 'board/x' } })
+    const merged = await execute(ctx, 'board_merge', 'm1', { id: String(task.id), revision: task.revision, notes: 'merged cleanly' })
+    expect(text(merged)).toContain('[done/')
+    const [stored] = await ctx.board.list({ workspaceId: WorkspaceId('ws-1') })
+    expect(stored?.execution?.mergeNotes).toBe('merged cleanly')
+
+    const plain = await ctx.board.create({ workspaceId: WorkspaceId('ws-1'), title: 'No notes' })
+    const mergedPlain = await execute(ctx, 'board_merge', 'm2', { id: String(plain.id), revision: plain.revision })
+    expect(text(mergedPlain)).toContain('[done/')
+
+    const withNotesNoExecution = await ctx.board.create({ workspaceId: WorkspaceId('ws-1'), title: 'Notes without execution' })
+    const mergedWithoutExecution = await execute(ctx, 'board_merge', 'm3', {
+      id: String(withNotesNoExecution.id), revision: withNotesNoExecution.revision, notes: 'ignored',
+    })
+    expect(text(mergedWithoutExecution)).toContain('[done/')
   })
 
   it('records the creating session, claims with an agent owner, and updates required fields only', async () => {

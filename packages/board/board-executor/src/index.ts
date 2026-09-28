@@ -42,6 +42,8 @@ export interface Config {
   branchPrefix?: string
   /** Dispatch automatically on every committed board change; defaults to false. */
   auto?: boolean
+  /** Attempts allowed per task before a failure leaves it `blocked`; defaults to 1. */
+  maxAttempts?: number
 }
 
 /** Configuration after schema defaults are applied. */
@@ -55,6 +57,7 @@ export const Config: z<Config, ResolvedConfig> = z.object({
   worktreeRoot: z.string().min(1).default(dshHomePath('worktrees')),
   branchPrefix: z.string().min(1).default('board/'),
   auto: z.boolean().default(false),
+  maxAttempts: z.number().step(1).min(1).max(10).default(1),
 })
 
 /** One dispatch request from a Host caller. */
@@ -118,6 +121,7 @@ export class BoardExecutor extends Service {
       provider,
       maxConcurrent: this.config.maxConcurrent,
       useWorktrees: this.config.useWorktrees,
+      maxAttempts: this.config.maxAttempts,
       signal: this.controller.signal,
       ...request.workspacePath === undefined ? {} : { workspacePath: request.workspacePath },
       ...request.parent === undefined ? {} : { parent: request.parent },
@@ -153,6 +157,7 @@ export class BoardExecutor extends Service {
           provider: this.config.provider as string,
           maxConcurrent: this.config.maxConcurrent,
           useWorktrees: this.config.useWorktrees,
+          maxAttempts: this.config.maxAttempts,
           signal: this.controller.signal,
           workspacePath: workspaceId => this.workspacePath(workspaceId),
           ...this.worktreeCreator(),
@@ -171,7 +176,7 @@ export class BoardExecutor extends Service {
   }
 
   /** The worktree creator when isolation is enabled, otherwise nothing. */
-  private worktreeCreator(): { createWorktree?: (taskId: string, workspace: string) => Promise<{ path: string }> } {
+  private worktreeCreator(): { createWorktree?: (taskId: string, workspace: string) => Promise<{ path: string; branch: string }> } {
     if (!this.config.useWorktrees) return {}
     const manager = this.worktrees()
     return { createWorktree: (taskId, workspace) => manager.create(taskId, workspace) }

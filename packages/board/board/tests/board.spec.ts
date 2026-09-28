@@ -113,6 +113,8 @@ describe('BoardService', () => {
     await expect(ctx.board.create({ workspaceId: WS, title: '   ' })).rejects.toBeInstanceOf(BoardInputError)
     const created = await ctx.board.create({ workspaceId: WS, title: 'Owned', createdBy: SessionId('owner') })
     expect(created.createdBy).toBe('owner')
+    const seeded = await ctx.board.create({ workspaceId: WS, title: 'Seeded', execution: { attempts: 2 } })
+    expect(seeded.execution?.attempts).toBe(2)
     const cancelled = await ctx.board.cancel(created.id, created.revision)
     expect(cancelled.status).toBe('cancelled')
 

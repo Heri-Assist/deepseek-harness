@@ -4820,11 +4820,15 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'BoardCreateInput',
-    declaration: 'export interface BoardCreateInput {\n    readonly workspaceId: WorkspaceId;\n    readonly title: string;\n    readonly description?: string;\n    readonly priority?: BoardPriority;\n    readonly labels?: readonly string[];\n    readonly blockedBy?: readonly BoardTaskId[];\n    readonly writeScopes?: readonly string[];\n    readonly createdBy?: SessionId;\n}',
+    declaration: 'export interface BoardCreateInput {\n    readonly workspaceId: WorkspaceId;\n    readonly title: string;\n    readonly description?: string;\n    readonly priority?: BoardPriority;\n    readonly labels?: readonly string[];\n    readonly blockedBy?: readonly BoardTaskId[];\n    readonly writeScopes?: readonly string[];\n    readonly createdBy?: SessionId;\n    readonly execution?: BoardExecution;\n}',
   },
   {
     name: 'BoardCreateRequest',
     declaration: 'export interface BoardCreateRequest {\n    readonly workspaceId: string;\n    readonly title: string;\n    readonly description?: string;\n    readonly priority?: BoardPriority;\n    readonly labels?: readonly string[];\n    readonly blockedBy?: readonly string[];\n    readonly writeScopes?: readonly string[];\n}',
+  },
+  {
+    name: 'BoardExecution',
+    declaration: 'export interface BoardExecution {\n    readonly attempts: number;\n    readonly worktreePath?: string | undefined;\n    readonly branch?: string | undefined;\n    readonly mergeNotes?: string | undefined;\n}',
   },
   {
     name: 'BoardListQuery',
@@ -4844,7 +4848,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'BoardTask',
-    declaration: 'export interface BoardTask {\n    readonly id: BoardTaskId;\n    readonly workspaceId: WorkspaceId;\n    readonly revision: number;\n    readonly title: string;\n    readonly description?: string | undefined;\n    readonly priority: BoardPriority;\n    readonly labels: readonly string[];\n    readonly status: BoardTaskStatus;\n    readonly blockedBy: readonly BoardTaskId[];\n    readonly writeScopes: readonly string[];\n    readonly assignee?: BoardAssignee | undefined;\n    readonly createdBy?: SessionId | undefined;\n    readonly createdAt: string;\n    readonly updatedAt: string;\n}',
+    declaration: 'export interface BoardTask {\n    readonly id: BoardTaskId;\n    readonly workspaceId: WorkspaceId;\n    readonly revision: number;\n    readonly title: string;\n    readonly description?: string | undefined;\n    readonly priority: BoardPriority;\n    readonly labels: readonly string[];\n    readonly status: BoardTaskStatus;\n    readonly blockedBy: readonly BoardTaskId[];\n    readonly writeScopes: readonly string[];\n    readonly assignee?: BoardAssignee | undefined;\n    readonly createdBy?: SessionId | undefined;\n    readonly execution?: BoardExecution | undefined;\n    readonly createdAt: string;\n    readonly updatedAt: string;\n}',
   },
   {
     name: 'BoardTaskId',
@@ -4860,7 +4864,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'BoardUpdateInput',
-    declaration: 'export interface BoardUpdateInput {\n    readonly id: BoardTaskId;\n    readonly revision: number;\n    readonly title?: string;\n    readonly description?: string;\n    readonly priority?: BoardPriority;\n    readonly labels?: readonly string[];\n    readonly status?: BoardTaskStatus;\n    readonly blockedBy?: readonly BoardTaskId[];\n    readonly writeScopes?: readonly string[];\n    readonly assignee?: BoardAssignee;\n}',
+    declaration: 'export interface BoardUpdateInput {\n    readonly id: BoardTaskId;\n    readonly revision: number;\n    readonly title?: string;\n    readonly description?: string;\n    readonly priority?: BoardPriority;\n    readonly labels?: readonly string[];\n    readonly status?: BoardTaskStatus;\n    readonly blockedBy?: readonly BoardTaskId[];\n    readonly writeScopes?: readonly string[];\n    readonly assignee?: BoardAssignee;\n    readonly execution?: BoardExecution;\n}',
   },
   {
     name: 'BoardUpdateRequest',
@@ -5244,7 +5248,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'DispatchOutcome',
-    declaration: 'export interface DispatchOutcome {\n    readonly started: string[];\n    readonly skipped: string[];\n}',
+    declaration: 'export interface DispatchOutcome {\n    readonly started: string[];\n    readonly skipped: string[];\n    readonly blocked: string[];\n}',
   },
   {
     name: 'DispatchRequest',
