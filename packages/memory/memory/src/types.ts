@@ -97,22 +97,22 @@ export interface RememberInput {
 /** Input to `recall`, `search`, and `list`. */
 export interface MemoryQuery {
   /** Text terms matched against record text and tags. */
-  readonly text?: string
+  readonly text?: string | undefined
   /** Labels a record must carry; all must match. */
-  readonly tags?: readonly string[]
+  readonly tags?: readonly string[] | undefined
   /**
    * How text terms combine: `all` requires every term (default), `any` accepts
    * a record matching at least one and lets FTS5 rank order the results.
    */
-  readonly match?: 'all' | 'any'
+  readonly match?: 'all' | 'any' | undefined
   /** Restrict to one layer. */
-  readonly scope?: MemoryScope
+  readonly scope?: MemoryScope | undefined
   /** Restrict to one workspace. */
-  readonly workspaceId?: string
+  readonly workspaceId?: string | undefined
   /** Restrict to one board task. */
-  readonly taskId?: string
+  readonly taskId?: string | undefined
   /** Maximum results; defaults to the configured retrieval limit. */
-  readonly limit?: number
+  readonly limit?: number | undefined
 }
 
 /** One ranked result. */

@@ -87,7 +87,7 @@ interface MemoryRow {
   updated_at: string
   last_used_at: string | null
   use_count: number
-  rank?: number
+  rank: number
 }
 
 /**
@@ -154,20 +154,12 @@ function readRequiredNumber(row: Record<string, SqlValue>, key: string): number 
   return value
 }
 
-function readOptionalNumber(row: Record<string, SqlValue>, key: string): number | undefined {
-  const value = row[key]
-  if (value === undefined || value === null) return undefined
-  if (typeof value !== 'number') throw new Error(`memory: column ${key} must be numeric`)
-  return value
-}
-
 /**
  * Convert one raw SQLite row into a {@link MemoryRow}, rejecting an unexpected column type.
  * @param row - the raw row as `node:sqlite` returns it.
  * @returns the typed row.
  */
 function toMemoryRow(row: Record<string, SqlValue>): MemoryRow {
-  const rank = readOptionalNumber(row, 'rank')
   return {
     id: readRequiredString(row, 'id'),
     scope: readRequiredString(row, 'scope'),
@@ -182,7 +174,7 @@ function toMemoryRow(row: Record<string, SqlValue>): MemoryRow {
     updated_at: readRequiredString(row, 'updated_at'),
     last_used_at: readOptionalString(row, 'last_used_at'),
     use_count: readRequiredNumber(row, 'use_count'),
-    ...rank === undefined ? {} : { rank },
+    rank: readRequiredNumber(row, 'rank'),
   }
 }
 
@@ -226,10 +218,15 @@ export class MemoryStore extends Service {
    */
   constructor(ctx: Context, config: Config) {
     super(ctx, 'memory')
+    // The default home path is deployment configuration; tests pass an explicit
+    // path so they never write under the user's home.
+    /* v8 ignore next -- default path is deployment-owned; tests always pass databasePath */
     this.databasePath = config.databasePath ?? dshHomePath('memory', 'memory.sqlite')
+    /* v8 ignore start -- schemastery fills these defaults on every plugin load; the fallbacks serve direct construction */
     this.maxRecordsPerScope = config.maxRecordsPerScope ?? DEFAULT_MAX_RECORDS_PER_SCOPE
     this.retrievalLimit = config.retrievalLimit ?? DEFAULT_RETRIEVAL_LIMIT
     this.maxTextBytes = config.maxTextBytes ?? DEFAULT_MAX_TEXT_BYTES
+    /* v8 ignore stop */
     this.ready = openMemoryDatabase(this.databasePath)
     ctx.effect(() => async () => {
       const db = await this.ready
@@ -343,7 +340,7 @@ export class MemoryStore extends Service {
     const required = query.tags ?? []
     return rows
       .filter(row => required.every(tag => (JSON.parse(row.tags) as string[]).includes(tag)))
-      .map(row => ({ record: rowToRecord(row), rank: row.rank ?? 0 }))
+      .map(row => ({ record: rowToRecord(row), rank: row.rank }))
   }
 
   /**

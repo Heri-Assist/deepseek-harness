@@ -112,12 +112,12 @@ export function registerMemoryTools(ctx: Context, memory: MemoryStore): () => vo
     },
     async execute(args) {
       const hits = await memory.recall({
-        ...args.query === undefined ? {} : { text: args.query },
-        ...args.tags === undefined ? {} : { tags: args.tags },
-        ...args.scope === undefined ? {} : { scope: args.scope as MemoryScope },
-        ...args.workspaceId === undefined ? {} : { workspaceId: args.workspaceId },
-        ...args.taskId === undefined ? {} : { taskId: args.taskId },
-        ...args.limit === undefined ? {} : { limit: args.limit },
+        text: args.query,
+        tags: args.tags,
+        scope: args.scope as MemoryScope | undefined,
+        workspaceId: args.workspaceId,
+        taskId: args.taskId,
+        limit: args.limit,
       })
       return {
         records: hits.map(hit => ({

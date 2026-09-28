@@ -42,6 +42,15 @@ describe('memory input validation', () => {
 })
 
 describe('memory query building and matching', () => {
+  it('accepts explicit store limits and defaults the rest', async () => {
+    const explicit = await harness({ maxRecordsPerScope: 5, retrievalLimit: 2, maxTextBytes: 128 })
+    await explicit.memory.remember({ text: 'configured', source: { origin: 'explicit' } })
+    expect((await explicit.memory.list({})).length).toBe(1)
+    const defaults = await harness()
+    await defaults.memory.remember({ text: 'defaulted', source: { origin: 'explicit' } })
+    expect((await defaults.memory.recall({ text: 'defaulted' })).length).toBe(1)
+  })
+
   it('returns no expression without a token and quotes phrases', () => {
     expect(buildMatchExpression('!!! ...')).toBeUndefined()
     expect(buildMatchExpression('alpha beta')).toBe('"alpha" AND "beta"')
@@ -112,6 +121,50 @@ describe('memory database ownership', () => {
     const rows = reopened.prepare('SELECT count(*) AS count FROM memories_fts').get() as { count: number }
     expect(rows.count).toBe(0)
     reopened.close()
+    await rm(directory, { recursive: true, force: true })
+  })
+})
+
+describe('memory row-type guards', () => {
+  it('rejects a row whose text, key, or use count has the wrong SQLite type', async () => {
+    for (const [column, value] of [['text', "x'00'"], ['key', "x'00'"], ['use_count', "'x'"]] as const) {
+      const directory = await mkdtemp(join(tmpdir(), 'dsh-mem-type-'))
+      const path = join(directory, 'memory.sqlite')
+      const ctx = new Context()
+      await ctx.plugin(SystemPrompt, {})
+      await ctx.plugin(ToolRuntime)
+      await ctx.plugin(MemoryStore, { databasePath: path })
+      await ctx.memory.remember({ text: 'typed fact', key: 'k', source: { origin: 'explicit' } })
+      const db = new DatabaseSync(path)
+      db.exec(`UPDATE memories SET ${column} = ${value}`)
+      db.close()
+      await expect(ctx.memory.search({})).rejects.toThrow('must be')
+      await ctx.fiber.dispose()
+      await rm(directory, { recursive: true, force: true })
+    }
+  })
+
+  it('lists with every optional filter and evicts within a scoped workspace', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'dsh-mem-scope-'))
+    const path = join(directory, 'memory.sqlite')
+    const ctx = new Context()
+    await ctx.plugin(SystemPrompt, {})
+    await ctx.plugin(ToolRuntime)
+    await ctx.plugin(MemoryStore, { databasePath: path, maxRecordsPerScope: 1 })
+    await ctx.memory.remember({ text: 'task fact', scope: 'task', workspaceId: 'ws-1', taskId: 't-1', tags: ['x'], source: { origin: 'explicit' } })
+    const listed = await ctx.memory.list({ workspaceId: 'ws-1', taskId: 't-1', tags: ['x'], limit: 1 })
+    expect(listed.map(record => record.text)).toEqual(['task fact'])
+    await ctx.memory.remember({ text: 'keyed fact', key: 'deploy', source: { origin: 'explicit' } })
+    const recalled = await ctx.memory.recall({ text: 'keyed' })
+    expect(recalled[0]?.record.key).toBe('deploy')
+    const afterRecall = await ctx.memory.list({})
+    expect(afterRecall.find(record => record.key === 'deploy')?.lastUsedAt).toBeDefined()
+    await ctx.memory.remember({ text: 'older project fact', scope: 'project', workspaceId: 'ws-2', source: { origin: 'explicit' } })
+    await new Promise(resolve => setTimeout(resolve, 2))
+    await ctx.memory.remember({ text: 'newer project fact', scope: 'project', workspaceId: 'ws-2', source: { origin: 'explicit' } })
+    const project = await ctx.memory.list({ scope: 'project', workspaceId: 'ws-2' })
+    expect(project.map(record => record.text)).toEqual(['newer project fact'])
+    await ctx.fiber.dispose()
     await rm(directory, { recursive: true, force: true })
   })
 })

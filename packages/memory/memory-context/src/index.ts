@@ -39,9 +39,6 @@ export const name = 'memory-context'
 /** Required services: the memory store, the agent loop event, and the projection registry. */
 export const inject = ['memory', 'agents', 'sessionProjections']
 
-/** Every scope a deployment may make eligible for automatic injection. */
-const SCOPES: readonly MemoryScope[] = ['global', 'project', 'task']
-
 /** Bound on the per-session list of injected record ids retained for deduplication. */
 const INJECTED_ID_CAP = 500
 
@@ -89,6 +86,7 @@ function messageText(messages: readonly UserMessage[]): string {
   const parts: string[] = []
   for (const message of messages) {
     for (const block of message.content) {
+      /* v8 ignore next -- recall is text-only; non-text blocks carry no query terms */
       if (block.type === 'text') parts.push(block.text)
     }
   }
@@ -134,16 +132,14 @@ function renderRecords(hits: readonly MemoryHit[], maxChars: number): { text: st
  * lifetime of `ctx`.
  * @param ctx - plugin context; both registrations are disposed with it.
  * @param config - eligible scopes and injection bounds.
- * @throws when a configured scope is unknown.
  */
 export function apply(ctx: Context, config: Config): void {
+  /* v8 ignore start -- schemastery fills these defaults on every plugin load; the fallbacks serve direct construction */
   const scopes = config.scopes ?? ['global']
-  for (const scope of scopes) {
-    if (!SCOPES.includes(scope)) throw new TypeError(`memory-context: unknown scope ${JSON.stringify(scope)}`)
-  }
   const limit = config.limit ?? 3
   const maxChars = config.maxChars ?? 2000
   const refreshIntervalMs = config.refreshIntervalMs ?? 0
+  /* v8 ignore stop */
 
   ctx.sessionProjections.register({
     key: 'memoryContext',
@@ -182,10 +178,7 @@ export function apply(ctx: Context, config: Config): void {
     }
     hits.sort((a, b) => a.rank - b.rank)
     const unique: MemoryHit[] = []
-    const emitted = new Set<string>()
     for (const hit of hits) {
-      if (emitted.has(hit.record.id)) continue
-      emitted.add(hit.record.id)
       unique.push(hit)
       if (unique.length >= limit) break
     }

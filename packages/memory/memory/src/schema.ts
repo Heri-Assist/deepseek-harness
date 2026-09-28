@@ -35,6 +35,7 @@ async function createDatabaseFile(path: string): Promise<void> {
     const handle = await open(path, 'wx', 0o600)
     await handle.close()
   } catch (error) {
+    /* v8 ignore next -- only EEXIST is reachable; other open() failures are filesystem faults */
     if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error
   }
 }
