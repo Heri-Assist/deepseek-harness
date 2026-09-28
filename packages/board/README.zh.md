@@ -25,6 +25,7 @@ kind: "package-group"
 | 包 | 作用 |
 |---|---|
 | [`board/`](board/README.zh.md) | 带依赖就绪选择与 `board_*` 工具的持久项目看板 |
+| [`board-executor/`](board-executor/README.zh.md) | 把就绪任务派发为委派运行，可选在各自的工作树中 |
 
 -----
 

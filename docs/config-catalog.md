@@ -446,6 +446,31 @@ export interface Config {
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-board -->
 
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-board-executor -->
+<a id="deepseek-aidsh-board-executor"></a>
+
+## `@deepseek-ai/dsh-board-executor`
+
+- `inject`: `board` · `subagents` · `agents`
+- `source`: [`packages/board/board-executor/src/index.ts:32`](../packages/board/board-executor/src/index.ts)
+
+```ts config-catalog
+/** Executor configuration. */
+export interface Config {
+  /** Named subagent provider used for delegated runs. */
+  provider?: string
+  /** Maximum tasks allowed in `in_progress` at once; defaults to 1. */
+  maxConcurrent?: number
+  /** Whether each task runs in its own worktree; defaults to true. */
+  useWorktrees?: boolean
+  /** Worktree root; defaults to `$DSH_HOME/worktrees`. */
+  worktreeRoot?: string
+  /** Branch-name prefix for created worktrees; defaults to `board/`. */
+  branchPrefix?: string
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-board-executor -->
+
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-client-connection -->
 <a id="deepseek-aidsh-client-connection"></a>
 

@@ -166,6 +166,7 @@ export class BoardService extends Service {
         createdAt: now,
         updatedAt: now,
         ...input.description === undefined ? {} : { description: input.description },
+        ...input.createdBy === undefined ? {} : { createdBy: input.createdBy },
       }
       assertGraph([...all, task])
       domain.table('tasks').put(task.id, task)

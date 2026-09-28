@@ -25,6 +25,7 @@ This group owns the project-scoped task board: durable tasks with dependency edg
 | Package | Role |
 |---|---|
 | [`board/`](board/README.md) | Durable project board with dependency-ready selection and the `board_*` tools |
+| [`board-executor/`](board-executor/README.md) | Dispatches ready tasks to delegated runs, optionally in their own worktrees |
 
 -----
 

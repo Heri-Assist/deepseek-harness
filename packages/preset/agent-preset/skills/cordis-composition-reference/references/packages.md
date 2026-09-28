@@ -35,6 +35,7 @@ Every package below exports a Cordis plugin that a bundle patch can name in a Lo
 | Package | Config | Description |
 |---|---|---|
 | `@deepseek-ai/dsh-board` | yes | Project-scoped agent task board with dependency-ready selection |
+| `@deepseek-ai/dsh-board-executor` | yes | Dispatch ready board tasks to delegated runs with worktree isolation |
 
 ## boot
 

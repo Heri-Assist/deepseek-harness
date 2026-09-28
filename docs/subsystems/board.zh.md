@@ -83,6 +83,23 @@ cancel(id: BoardTaskId, revision: number): Promise<BoardTask>
 
 Source: [`packages/board/board/src/index.ts`](../../packages/board/board/src/index.ts)
 
+<a id="ctxboardexecutor--boardexecutor"></a>
+
+### `ctx.boardExecutor` — `BoardExecutor`
+
+Dispatch ready tasks on a board to delegated runs.
+
+```ts cordis-catalog
+/**
+ * Run one dispatch pass.
+ * @param request - board, optional repository path, and optional parent.
+ * @returns the started and skipped task ids.
+ */
+dispatch(request: DispatchRequest): Promise<DispatchOutcome>
+```
+
+Source: [`packages/board/board-executor/src/index.ts`](../../packages/board/board-executor/src/index.ts)
+
 <a id="board-events"></a>
 
 ### `board/*` events

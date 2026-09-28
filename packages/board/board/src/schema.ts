@@ -30,6 +30,7 @@ export const boardTaskSchema = z.object({
   status: z.enum(BOARD_TASK_STATUSES),
   blockedBy: z.array(z.string().min(1).transform(BoardTaskId)),
   writeScopes: z.array(z.string().min(1)),
+  createdBy: z.string().min(1).transform(SessionId).optional(),
   assignee: assigneeSchema.optional(),
   createdAt: z.string(),
   updatedAt: z.string(),

@@ -66,6 +66,8 @@ export interface BoardTask {
   readonly writeScopes: readonly string[]
   /** Current owner, when claimed. */
   readonly assignee?: BoardAssignee | undefined
+  /** Session that created the task; the dispatcher resolves it as the parent agent. */
+  readonly createdBy?: SessionId | undefined
   /** Creation instant, ISO-8601 with millisecond precision. */
   readonly createdAt: string
   /** Last mutation instant. */
@@ -88,6 +90,8 @@ export interface BoardCreateInput {
   readonly blockedBy?: readonly BoardTaskId[]
   /** Optional intended write scopes. */
   readonly writeScopes?: readonly string[]
+  /** Session creating the task; the dispatcher uses it to resolve a parent agent. */
+  readonly createdBy?: SessionId
 }
 
 /** Input to `update`; every listed field replaces the stored one. */

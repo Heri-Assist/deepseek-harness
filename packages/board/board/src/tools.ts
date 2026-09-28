@@ -90,10 +90,12 @@ export function registerBoardTools(ctx: Context, board: BoardService): () => voi
       schema: TASK_VIEW_SCHEMA,
       render: (_args, value) => [{ type: 'text', text: line(value) }],
     },
-    async execute(args) {
+    async execute(args, exec) {
+      const sessionId = exec.agent?.session.header.id
       return view(await board.create({
         workspaceId: WorkspaceId(args.workspaceId),
         title: args.title,
+        ...sessionId === undefined ? {} : { createdBy: sessionId },
         ...args.description === undefined ? {} : { description: args.description },
         ...args.priority === undefined ? {} : { priority: args.priority as BoardPriority },
         ...args.labels === undefined ? {} : { labels: args.labels },

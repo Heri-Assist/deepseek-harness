@@ -592,6 +592,19 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'boardExecutor',
+    summary: 'Dispatch ready tasks on a board to delegated runs.',
+    description: 'Dispatch ready tasks on a board to delegated runs.',
+    methods: [
+      {
+        signature: 'dispatch(request: DispatchRequest): Promise<DispatchOutcome>',
+        description: 'Run one dispatch pass.',
+        parameters: [{ name: 'request', description: 'board, optional repository path, and optional parent.' }],
+        returns: 'the started and skipped task ids.',
+      },
+    ],
+  },
+  {
     key: 'browserUse',
     summary: 'Owns one optional provider registration in the shared browser-use service.',
     description: 'Owns one optional provider registration in the shared browser-use service.',
@@ -4776,7 +4789,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'BoardCreateInput',
-    declaration: 'export interface BoardCreateInput {\n    readonly workspaceId: WorkspaceId;\n    readonly title: string;\n    readonly description?: string;\n    readonly priority?: BoardPriority;\n    readonly labels?: readonly string[];\n    readonly blockedBy?: readonly BoardTaskId[];\n    readonly writeScopes?: readonly string[];\n}',
+    declaration: 'export interface BoardCreateInput {\n    readonly workspaceId: WorkspaceId;\n    readonly title: string;\n    readonly description?: string;\n    readonly priority?: BoardPriority;\n    readonly labels?: readonly string[];\n    readonly blockedBy?: readonly BoardTaskId[];\n    readonly writeScopes?: readonly string[];\n    readonly createdBy?: SessionId;\n}',
   },
   {
     name: 'BoardListQuery',
@@ -4788,7 +4801,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'BoardTask',
-    declaration: 'export interface BoardTask {\n    readonly id: BoardTaskId;\n    readonly workspaceId: WorkspaceId;\n    readonly revision: number;\n    readonly title: string;\n    readonly description?: string | undefined;\n    readonly priority: BoardPriority;\n    readonly labels: readonly string[];\n    readonly status: BoardTaskStatus;\n    readonly blockedBy: readonly BoardTaskId[];\n    readonly writeScopes: readonly string[];\n    readonly assignee?: BoardAssignee | undefined;\n    readonly createdAt: string;\n    readonly updatedAt: string;\n}',
+    declaration: 'export interface BoardTask {\n    readonly id: BoardTaskId;\n    readonly workspaceId: WorkspaceId;\n    readonly revision: number;\n    readonly title: string;\n    readonly description?: string | undefined;\n    readonly priority: BoardPriority;\n    readonly labels: readonly string[];\n    readonly status: BoardTaskStatus;\n    readonly blockedBy: readonly BoardTaskId[];\n    readonly writeScopes: readonly string[];\n    readonly assignee?: BoardAssignee | undefined;\n    readonly createdBy?: SessionId | undefined;\n    readonly createdAt: string;\n    readonly updatedAt: string;\n}',
   },
   {
     name: 'BoardTaskId',
@@ -5177,6 +5190,14 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'DirectoryRegistrationHandle',
     declaration: 'export interface DirectoryRegistrationHandle {\n    (): void;\n    replace(entries: readonly LlmConfigurableProvider[]): void;\n}',
+  },
+  {
+    name: 'DispatchOutcome',
+    declaration: 'export interface DispatchOutcome {\n    readonly started: string[];\n    readonly skipped: string[];\n}',
+  },
+  {
+    name: 'DispatchRequest',
+    declaration: 'export interface DispatchRequest {\n    readonly workspaceId: string;\n    readonly workspacePath?: string;\n    readonly provider?: string;\n    readonly parent?: Agent;\n}',
   },
   {
     name: 'Domain',

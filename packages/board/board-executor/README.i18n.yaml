@@ -1,0 +1,40 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/board/board-executor/README.md
+/:
+  en: 2340aea70916b8b8
+  zh: 90e8bd55e7da380c
+/deepseek-ai-dsh-board-executor:
+  en: 37b933ea80fcd57f
+  zh: ef9ab233261fa409
+/deepseek-ai-dsh-board-executor/summary:
+  en: 61b778202a08da2a
+  zh: 8e70a84eec60fe69
+/deepseek-ai-dsh-board-executor/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 5b6bd00fce5371c3
+/deepseek-ai-dsh-board-executor/use-this-package:
+  en: c1e8b92bf670d2d4
+  zh: 70fdf5dccb37876c
+/deepseek-ai-dsh-board-executor/use-this-package/how-a-pass-resolves-a-parent:
+  en: 9d126a7f78bb2485
+  zh: 9d258a60e3901440
+/deepseek-ai-dsh-board-executor/understand-the-implementation:
+  en: 9313a98adb56ac97
+  zh: 67ec6cf603f848ed
+/deepseek-ai-dsh-board-executor/further-exploration:
+  en: c6b075c47c96b8df
+  zh: ddb52c0d6c83eec9
+/deepseek-ai-dsh-board-executor/model-experience:
+  en: 96fe30dfbf2d79af
+  zh: 0cde307094b0d084
+/deepseek-ai-dsh-board-executor/model-experience/kv-cache-effect:
+  en: 2a8f778dc162ce4c
+  zh: 2a8f778dc162ce4c
+/deepseek-ai-dsh-board-executor/known-limitations-and-deferred-work:
+  en: 084f72ae8c1aff28
+  zh: 73e4846bb53cf889
+/deepseek-ai-dsh-board-executor/known-limitations-and-deferred-work/dev-note:
+  en: 0225ba087c5266f3
+  zh: 53f5adbcc7db8671

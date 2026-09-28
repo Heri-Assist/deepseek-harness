@@ -625,6 +625,14 @@ const SERVICE_ROLES: ServiceRole[] = [
     note: 'Owns durable per-workspace tasks, derives readiness from dependency edges, and registers the board tools.',
   },
   {
+    key: 'boardExecutor',
+    pkg: 'board-executor',
+    title: 'Board dispatch to delegated runs',
+    mode: 'core',
+    consumers: ['board'],
+    note: 'Plans ready, scope-disjoint tasks, claims them, and starts each as a delegated run, optionally isolated in a git worktree.',
+  },
+  {
     key: 'goals',
     pkg: 'goal',
     title: 'Same-session goal domain',
