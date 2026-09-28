@@ -3,14 +3,14 @@
 # After editing either side, bring the other along and re-record with:
 #   pnpm run verify-translation-pairing --write docs/deepseek-llm-api-wire-extensions.md
 /official-deepseek-llm-api-wire-extensions:
-  en: 39729b071744e94b
-  zh: f3a1913295e78b5f
+  en: 46b61f61e220067e
+  zh: 0921ed6046b0008d
 /official-deepseek-llm-api-wire-extensions/wire-namespaces-and-versioning:
   en: 1da81051addc4b47
   zh: 3e8d7cd3f8c1cdba
 /official-deepseek-llm-api-wire-extensions/request-headers:
-  en: 740e92e903ecb594
-  zh: f934d3c9e5c56bfe
+  en: c5e70f1946aa22fd
+  zh: acd24d8c1980fedf
 /official-deepseek-llm-api-wire-extensions/body-extension-transaction:
   en: f0b1443c364a431c
   zh: 16d16ddf5c451e8e
