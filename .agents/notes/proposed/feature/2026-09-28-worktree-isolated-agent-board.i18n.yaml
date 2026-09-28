@@ -1,0 +1,46 @@
+# Bilingual-pair consistency record for 2026-09-28-worktree-isolated-agent-board.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/proposed/feature/2026-09-28-worktree-isolated-agent-board.md
+/agent-note-worktree-isolated-agent-board:
+  en: 4cc57825ba289526
+  zh: 3f951eb5445fe6f4
+/agent-note-worktree-isolated-agent-board/problem:
+  en: 6cad2061a1e8a8ec
+  zh: efc727ba6be56256
+/agent-note-worktree-isolated-agent-board/proposal:
+  en: e967627221a5b0ac
+  zh: 72c2bb54d5b8fb17
+/agent-note-worktree-isolated-agent-board/proposal/task-model:
+  en: aced0556c096630a
+  zh: d598df76d0c996de
+/agent-note-worktree-isolated-agent-board/proposal/dispatch-and-isolation:
+  en: c3cf67f38ecd35fa
+  zh: 4b4e79e4a1629354
+/agent-note-worktree-isolated-agent-board/proposal/subagent-working-directory-seam:
+  en: 6b369a65517c238d
+  zh: a451bba2709496b3
+/agent-note-worktree-isolated-agent-board/proposal/composition:
+  en: 65bbacb0ee79b744
+  zh: 3de4a964d29e1fec
+/agent-note-worktree-isolated-agent-board/alternatives-considered:
+  en: 6119e2aff3b6be5a
+  zh: 6119e2aff3b6be5a
+/agent-note-worktree-isolated-agent-board/alternatives-considered/why-not-extend-the-agent-teams-board:
+  en: 40fe98efceea0c2b
+  zh: 0305920a547594cd
+/agent-note-worktree-isolated-agent-board/alternatives-considered/why-not-one-board-per-session:
+  en: 92e16e6066b2d018
+  zh: e10d7298a871e0a8
+/agent-note-worktree-isolated-agent-board/alternatives-considered/why-not-a-shared-checkout-with-serialized-dispatch:
+  en: 9da2e97ac2021cdf
+  zh: 4e58e963f70feef8
+/agent-note-worktree-isolated-agent-board/alternatives-considered/why-not-auto-merge-on-completion:
+  en: 3c2f78df3c5f0184
+  zh: 454ec2939f0c0ebe
+/agent-note-worktree-isolated-agent-board/acceptance-criteria:
+  en: 68c4c72cd9c0e2fe
+  zh: 0f9612d4dcc37f61
+/agent-note-worktree-isolated-agent-board/risks:
+  en: 1d3f86991eaad898
+  zh: 18d97d4ec9784822
