@@ -19,6 +19,8 @@ This table connects model-visible tool names to the plugin package and service s
 | `@deepseek-ai/dsh-mcp-resources` | `list_mcp_resource_templates`, `list_mcp_resources`, `read_mcp_resource` | `ctx.tools`, `ctx.mcpResources` | `tool/call`, `tool/result` | - | - |
 | `@deepseek-ai/dsh-experimental-browser-use-stagehand-native` | `stagehand_act`, `stagehand_extract`, `stagehand_navigate`, `stagehand_observe`, `stagehand_screenshot`, `stagehand_tabs` | `ctx.browserUse`, `ctx.agents`, `ctx.tools`, `ctx.systemPrompt` | `tool/call`, `tool/result` | - | - |
 | `@deepseek-ai/dsh-tool-ask-user` | `ask_user_question` | `ctx.tools`, `ctx.userQuestions` | `tool/call`, `tool/result after a UI/provider answers the question` | - | ask_user_question pauses the tool call until the active UI provider returns a human answer. |
+| `@deepseek-ai/dsh-memory` | `forget`, `recall`, `remember` | `ctx.tools`, `ctx.memory` | `tool/call`, `tool/result`, `the memory store`, `memory/changed` | - | - |
+| `@deepseek-ai/dsh-board` | `board_claim`, `board_complete`, `board_create`, `board_get`, `board_list`, `board_merge`, `board_update` | `ctx.tools`, `ctx.board` | `tool/call`, `tool/result`, `the board storage domain`, `board/changed` | - | - |
 | `@deepseek-ai/dsh-tools` | `run_code` | `ctx.tools`, `ctx.ptcRuntime (execution time)`, `ctx.systemPrompt` | `tool/call`, `one tool/ptc-dispatch-start + tool/ptc-dispatch pair per bridged sub-call`, `tool/result` | - | Owned by the tool registry as a reserved transport outside filterable capability layers under `mode: ptc` / `mode: both` (see the PTC mode Agent Note). Under `ptc` it is the registry's only wire contribution; the other visible capabilities are declared in a generated SDK section in the loaded runtime's language, and a program calls them through bindings scheduled under the native concurrency contract (submission-ordered starts and policy; concurrency-safe bodies overlap up to `maxParallelSubCalls`) that re-enter the complete guarded tool pipeline and link each nested execution to this outer result. |
 | `@deepseek-ai/dsh-plan-mode` | `exit_plan_mode` | `ctx.tools`, `ctx.systemPrompt`, `ctx.userQuestions (execution time, opportunistic)` | `tool/call`, `plan/mode inactive on an approved review`, `tool/result` | - | exit_plan_mode stays in the model-facing schema while planning is inactive so transitions add no tool-catalog churn on top of the plan-policy change. Its execute path rejects calls outside plan mode; in plan mode it presents the plan over the user-questions seam (approve / keep planning with feedback), and approval logs plan mode inactive at the step boundary. |
 | `@deepseek-ai/dsh-tool-bash` | `bash` | `ctx.tools`, `ctx.shell`, `ctx.systemPrompt`, `ctx.shellEnv`, `ctx.jobs for run_in_background and the job-backed foreground path` | `tool/call`, `tool/result` | - | The bash tool is the model-facing consumer of the bash executor seam. With a job registry composed every call registers with the generic `ctx.jobs` runtime as it starts, collected/stopped through the `job_*` tools from `@deepseek-ai/dsh-tool-jobs`; without one, or with `enableRunInBackground: false`, the tool registers a foreground-only schema without the `run_in_background` parameter. |
@@ -516,6 +518,414 @@ Ask the user a concise question when you need confirmation, a choice, or missing
 Source: [`packages/interaction/tool-ask-user/src/index.ts`](../packages/interaction/tool-ask-user/src/index.ts)
 
 ask_user_question pauses the tool call until the active UI provider returns a human answer.
+
+<a id="deepseek-aidsh-memory"></a>
+
+## `@deepseek-ai/dsh-memory`
+
+### `forget`
+
+Soft-delete one memory record by id, keeping an auditable tombstone.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The record id returned by `remember` or `recall`."
+    }
+  },
+  "required": [
+    "id"
+  ]
+}
+```
+
+Source: [`packages/memory/memory/src/tools.ts`](../packages/memory/memory/src/tools.ts)
+
+### `recall`
+
+Look up durable facts saved by `remember`. Returns the best keyword matches within the requested scope; use it before retrying work whose context may already be recorded.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "Words matched against record text and tags."
+    },
+    "tags": {
+      "type": "array",
+      "description": "Only records carrying every listed tag.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "scope": {
+      "type": "string",
+      "description": "Restrict to one layer.",
+      "enum": [
+        "global",
+        "project",
+        "task"
+      ]
+    },
+    "workspaceId": {
+      "type": "string",
+      "description": "Restrict to one workspace."
+    },
+    "taskId": {
+      "type": "string",
+      "description": "Restrict to one board task."
+    },
+    "limit": {
+      "type": "integer",
+      "description": "Maximum results; defaults to the configured retrieval limit."
+    }
+  }
+}
+```
+
+Source: [`packages/memory/memory/src/tools.ts`](../packages/memory/memory/src/tools.ts)
+
+### `remember`
+
+Save one durable fact for later sessions. Use it for decisions, conventions, and preferences worth keeping; scope `project` needs a workspaceId, `task` also needs a taskId.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "text": {
+      "type": "string",
+      "description": "The fact to remember — one concrete statement."
+    },
+    "scope": {
+      "type": "string",
+      "description": "global (default) | project | task.",
+      "enum": [
+        "global",
+        "project",
+        "task"
+      ]
+    },
+    "key": {
+      "type": "string",
+      "description": "Optional short lookup key, unique within the scope."
+    },
+    "tags": {
+      "type": "array",
+      "description": "Optional labels for later tag filtering.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "workspaceId": {
+      "type": "string",
+      "description": "Owning workspace; required for project and task scopes."
+    },
+    "taskId": {
+      "type": "string",
+      "description": "Owning board task; required for the task scope."
+    },
+    "pinned": {
+      "type": "boolean",
+      "description": "Keep this record past scope eviction and across compaction."
+    }
+  },
+  "required": [
+    "text"
+  ]
+}
+```
+
+Source: [`packages/memory/memory/src/tools.ts`](../packages/memory/memory/src/tools.ts)
+
+<a id="deepseek-aidsh-board"></a>
+
+## `@deepseek-ai/dsh-board`
+
+### `board_claim`
+
+Take a ready board task and move it to `in_progress`, recording you as the owner.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Task id."
+    },
+    "revision": {
+      "type": "integer",
+      "description": "Current revision from the last read."
+    },
+    "label": {
+      "type": "string",
+      "description": "Short owner label."
+    }
+  },
+  "required": [
+    "id",
+    "revision"
+  ]
+}
+```
+
+Source: [`packages/board/board/src/tools.ts`](../packages/board/board/src/tools.ts)
+
+### `board_complete`
+
+Mark a board task done under compare-and-set.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Task id."
+    },
+    "revision": {
+      "type": "integer",
+      "description": "Current revision from the last read."
+    }
+  },
+  "required": [
+    "id",
+    "revision"
+  ]
+}
+```
+
+Source: [`packages/board/board/src/tools.ts`](../packages/board/board/src/tools.ts)
+
+### `board_create`
+
+Add one task to a project board. Tasks start `backlog`; `blockedBy` lists task ids that must finish first.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "workspaceId": {
+      "type": "string",
+      "description": "Owning workspace id."
+    },
+    "title": {
+      "type": "string",
+      "description": "Short task name."
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional detail."
+    },
+    "priority": {
+      "type": "string",
+      "description": "low | normal (default) | high.",
+      "enum": [
+        "low",
+        "normal",
+        "high"
+      ]
+    },
+    "labels": {
+      "type": "array",
+      "description": "Optional labels.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blockedBy": {
+      "type": "array",
+      "description": "Task ids that must reach done first.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "writeScopes": {
+      "type": "array",
+      "description": "Paths or globs this task intends to change.",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "workspaceId",
+    "title"
+  ]
+}
+```
+
+Source: [`packages/board/board/src/tools.ts`](../packages/board/board/src/tools.ts)
+
+### `board_get`
+
+Read one board task by id.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Task id."
+    }
+  },
+  "required": [
+    "id"
+  ]
+}
+```
+
+Source: [`packages/board/board/src/tools.ts`](../packages/board/board/src/tools.ts)
+
+### `board_list`
+
+List a project board. Pass `readyOnly` to see only tasks whose dependencies are all done.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "workspaceId": {
+      "type": "string",
+      "description": "Board to read."
+    },
+    "status": {
+      "type": "string",
+      "description": "Restrict to one status.",
+      "enum": [
+        "backlog",
+        "in_progress",
+        "review",
+        "done",
+        "cancelled",
+        "blocked"
+      ]
+    },
+    "readyOnly": {
+      "type": "boolean",
+      "description": "Only tasks ready to start."
+    }
+  },
+  "required": [
+    "workspaceId"
+  ]
+}
+```
+
+Source: [`packages/board/board/src/tools.ts`](../packages/board/board/src/tools.ts)
+
+### `board_merge`
+
+Mark a reviewed board task done, recording that its branch was integrated. Pass the current revision.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Task id."
+    },
+    "revision": {
+      "type": "integer",
+      "description": "Current revision from the last read."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional integration note recorded on the task."
+    }
+  },
+  "required": [
+    "id",
+    "revision"
+  ]
+}
+```
+
+Source: [`packages/board/board/src/tools.ts`](../packages/board/board/src/tools.ts)
+
+### `board_update`
+
+Change a board task. Pass the current `revision`; a stale revision fails and you must re-read with board_get or board_list.
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Task id."
+    },
+    "revision": {
+      "type": "integer",
+      "description": "Current revision from the last read."
+    },
+    "title": {
+      "type": "string",
+      "description": "Replacement title."
+    },
+    "description": {
+      "type": "string",
+      "description": "Replacement description."
+    },
+    "priority": {
+      "type": "string",
+      "description": "Replacement priority.",
+      "enum": [
+        "low",
+        "normal",
+        "high"
+      ]
+    },
+    "labels": {
+      "type": "array",
+      "description": "Replacement labels.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "type": "string",
+      "description": "Replacement status.",
+      "enum": [
+        "backlog",
+        "in_progress",
+        "review",
+        "done",
+        "cancelled",
+        "blocked"
+      ]
+    },
+    "blockedBy": {
+      "type": "array",
+      "description": "Replacement blockers.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "writeScopes": {
+      "type": "array",
+      "description": "Replacement write scopes.",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "revision"
+  ]
+}
+```
+
+Source: [`packages/board/board/src/tools.ts`](../packages/board/board/src/tools.ts)
 
 <a id="deepseek-aidsh-tools"></a>
 

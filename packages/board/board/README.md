@@ -79,7 +79,7 @@ The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-a
 
 #### What the model sees
 
-A live root Agent gains `board_create`, `board_list`, `board_get`, `board_update`, `board_complete`, and `board_claim`. Each task appears as `- <id> r<revision> [<status>/<priority>] <title>`, with blockers when present. The schema source is [`src/tools.ts`](src/tools.ts).
+A live root Agent gains `board_create`, `board_list`, `board_get`, `board_update`, `board_complete`, and `board_claim`. Each task appears as `- <id> r<revision> [<status>/<priority>] <title>`, with blockers when present. The generated [tool catalog](../../../docs/tool-catalog.md#deepseek-aidsh-board) is the exhaustive schema source.
 
 #### Token effect
 

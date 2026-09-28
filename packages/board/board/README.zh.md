@@ -79,7 +79,7 @@ kind: "package-reference"
 
 #### 模型看到什么
 
-活动的根 Agent 获得 `board_create`、`board_list`、`board_get`、`board_update`、`board_complete` 与 `board_claim`。每个任务呈现为 `- <id> r<revision> [<status>/<priority>] <title>`，存在阻塞时附带 blockers。schema 来源是 [`src/tools.ts`](src/tools.ts)。
+活动的根 Agent 获得 `board_create`、`board_list`、`board_get`、`board_update`、`board_complete` 与 `board_claim`。每个任务呈现为 `- <id> r<revision> [<status>/<priority>] <title>`，存在阻塞时附带 blockers。生成式[工具目录](../../../docs/tool-catalog.zh.md#deepseek-aidsh-board)是详尽的 schema 来源。
 
 #### Token 影响
 

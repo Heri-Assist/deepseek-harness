@@ -28,6 +28,10 @@ import LocalFileSystem from '@deepseek-ai/dsh-fs-local'
 import { AttachmentStore } from '@deepseek-ai/dsh-attachment'
 import type { ImageAttachmentLimits, ImageAttachmentRef, SaveImageAttachment, StoredImageAttachment } from '@deepseek-ai/dsh-attachment'
 import UserQuestionService from '@deepseek-ai/dsh-user-questions'
+import MemoryStore from '@deepseek-ai/dsh-memory'
+import BoardService from '@deepseek-ai/dsh-board'
+import Storage from '@deepseek-ai/dsh-storage'
+import { DomainFacility } from '@deepseek-ai/dsh-storage-domain'
 import PlanModeController from '@deepseek-ai/dsh-plan-mode'
 import WebRuntime from '@deepseek-ai/dsh-web'
 import * as WebSearchExa from '@deepseek-ai/dsh-web-search-exa'
@@ -255,6 +259,33 @@ const TOOL_PACKAGES: ToolPackage[] = [
     },
     note:
       'ask_user_question pauses the tool call until the active UI provider returns a human answer.',
+  },
+  {
+    pkg: '@deepseek-ai/dsh-memory',
+    dir: 'memory',
+    source: 'packages/memory/memory/src/tools.ts',
+    requires: ['ctx.tools', 'ctx.memory'],
+    writes: ['tool/call', 'tool/result', 'the memory store', 'memory/changed'],
+    async mount(ctx) {
+      await ctx.plugin(MemoryStore, { databasePath: ':memory:' })
+    },
+  },
+  {
+    pkg: '@deepseek-ai/dsh-board',
+    dir: 'board',
+    source: 'packages/board/board/src/tools.ts',
+    requires: ['ctx.tools', 'ctx.board'],
+    writes: ['tool/call', 'tool/result', 'the board storage domain', 'board/changed'],
+    async mount(ctx) {
+      await ctx.plugin(Storage)
+      const facility = new DomainFacility(ctx, { backend: 'memory' })
+      ctx.effect(() => {
+        const unmount = ctx.storage.mount('domain', facility)
+        ctx.provide('storageDomain', facility)
+        return () => { unmount() }
+      })
+      await ctx.plugin(BoardService)
+    },
   },
   {
     pkg: '@deepseek-ai/dsh-tools',

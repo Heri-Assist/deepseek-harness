@@ -23,6 +23,8 @@
 | `@deepseek-ai/dsh-mcp-resources` | `list_mcp_resource_templates`, `list_mcp_resources`, `read_mcp_resource` | `ctx.tools`, `ctx.mcpResources` | `tool/call`, `tool/result` | - | - |
 | `@deepseek-ai/dsh-experimental-browser-use-stagehand-native` | `stagehand_act`、`stagehand_extract`、`stagehand_navigate`、`stagehand_observe`、`stagehand_screenshot`、`stagehand_tabs` | `ctx.browserUse`、`ctx.agents`、`ctx.tools`、`ctx.systemPrompt` | `tool/call`、`tool/result` | - | - |
 | `@deepseek-ai/dsh-tool-ask-user` | `ask_user_question` | `ctx.tools`、`ctx.userQuestions` | `tool/call`、`tool/result after a UI/provider answers the question` | - | ask_user_question 会暂停工具调用，直到当前 UI 提供方返回人类答案。 |
+| `@deepseek-ai/dsh-memory` | `forget`、`recall`、`remember` | `ctx.tools`、`ctx.memory` | `tool/call`、`tool/result`、`the memory store`、`memory/changed` | - | - |
+| `@deepseek-ai/dsh-board` | `board_claim`、`board_complete`、`board_create`、`board_get`、`board_list`、`board_merge`、`board_update` | `ctx.tools`、`ctx.board` | `tool/call`、`tool/result`、`the board storage domain`、`board/changed` | - | - |
 | `@deepseek-ai/dsh-tools` | `run_code` | `ctx.tools`、`ctx.ptcRuntime (execution time)`、`ctx.systemPrompt` | `tool/call`、`one tool/ptc-dispatch-start + tool/ptc-dispatch pair per bridged sub-call`、`tool/result` | - | 在 `mode: ptc`／`mode: both` 下，它由工具注册表所有，作为可过滤能力层之外的保留传输机制（参见 PTC mode Agent Note）。在 `ptc` 下，它是注册表对协议格式（wire format）的唯一贡献；其他可见能力在使用已加载运行时语言生成的 SDK 章节中声明。程序通过 binding 调用这些能力，调用按照原生并发约定调度：启动顺序和策略遵循提交顺序，并发安全的函数体最多重叠执行 `maxParallelSubCalls` 个。调用会重新进入完整且受守卫保护的工具流水线，并将每个嵌套执行关联到此外层结果。 |
 | `@deepseek-ai/dsh-plan-mode` | `exit_plan_mode` | `ctx.tools`、`ctx.systemPrompt`、`ctx.userQuestions (execution time, opportunistic)` | `tool/call`、`plan/mode inactive on an approved review`、`tool/result` | - | 规划未激活时，exit_plan_mode 仍保留在面向模型的 schema 中，这样状态转换不会在规划策略变更之外额外造成工具目录变动。其执行路径会拒绝规划模式之外的调用；在规划模式下，它通过用户交互 seam 提交计划（批准／根据反馈继续规划），批准后会在步骤边界记录规划模式已停用。 |
 | `@deepseek-ai/dsh-tool-bash` | `bash` | `ctx.tools`、`ctx.shell`、`ctx.systemPrompt`、`ctx.shellEnv`、`ctx.jobs for run_in_background and the job-backed foreground path` | `tool/call`、`tool/result` | - | bash 工具是 bash 执行器 seam 面向模型的消费方。组合中有 job 注册表时，每次调用一启动就注册到通用 `ctx.jobs` 运行时，并通过 `job_*` 工具（来自 `@deepseek-ai/dsh-tool-jobs`）收集／停止；没有注册表或 `enableRunInBackground: false` 时，工具注册不带 `run_in_background` 参数的纯前台 schema。 |
@@ -520,6 +522,414 @@
 来源：[`packages/interaction/tool-ask-user/src/index.ts`](../packages/interaction/tool-ask-user/src/index.ts)
 
 ask_user_question 会暂停工具调用，直到当前 UI 提供方返回人类答案。
+
+<a id="deepseek-aidsh-memory"></a>
+
+## `@deepseek-ai/dsh-memory`
+
+### `forget`
+
+按 id 软删除一条记忆记录，保留可审计的墓碑。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The record id returned by `remember` or `recall`."
+    }
+  },
+  "required": [
+    "id"
+  ]
+}
+```
+
+Source: [`packages/memory/memory/src/tools.ts`](../packages/memory/memory/src/tools.ts)
+
+### `recall`
+
+查找由 `remember` 保存的持久事实。返回所请求 scope 内最佳的关键词匹配；在重试其上下文可能已被记录的工作之前使用它。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "Words matched against record text and tags."
+    },
+    "tags": {
+      "type": "array",
+      "description": "Only records carrying every listed tag.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "scope": {
+      "type": "string",
+      "description": "Restrict to one layer.",
+      "enum": [
+        "global",
+        "project",
+        "task"
+      ]
+    },
+    "workspaceId": {
+      "type": "string",
+      "description": "Restrict to one workspace."
+    },
+    "taskId": {
+      "type": "string",
+      "description": "Restrict to one board task."
+    },
+    "limit": {
+      "type": "integer",
+      "description": "Maximum results; defaults to the configured retrieval limit."
+    }
+  }
+}
+```
+
+Source: [`packages/memory/memory/src/tools.ts`](../packages/memory/memory/src/tools.ts)
+
+### `remember`
+
+为后续会话保存一条持久事实。用于值得保留的决策、约定与偏好；`project` scope 需要 workspaceId，`task` 还需要 taskId。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "text": {
+      "type": "string",
+      "description": "The fact to remember — one concrete statement."
+    },
+    "scope": {
+      "type": "string",
+      "description": "global (default) | project | task.",
+      "enum": [
+        "global",
+        "project",
+        "task"
+      ]
+    },
+    "key": {
+      "type": "string",
+      "description": "Optional short lookup key, unique within the scope."
+    },
+    "tags": {
+      "type": "array",
+      "description": "Optional labels for later tag filtering.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "workspaceId": {
+      "type": "string",
+      "description": "Owning workspace; required for project and task scopes."
+    },
+    "taskId": {
+      "type": "string",
+      "description": "Owning board task; required for the task scope."
+    },
+    "pinned": {
+      "type": "boolean",
+      "description": "Keep this record past scope eviction and across compaction."
+    }
+  },
+  "required": [
+    "text"
+  ]
+}
+```
+
+Source: [`packages/memory/memory/src/tools.ts`](../packages/memory/memory/src/tools.ts)
+
+<a id="deepseek-aidsh-board"></a>
+
+## `@deepseek-ai/dsh-board`
+
+### `board_claim`
+
+认领一个就绪的看板任务并把它移到 `in_progress`，把你记录为负责人。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Task id."
+    },
+    "revision": {
+      "type": "integer",
+      "description": "Current revision from the last read."
+    },
+    "label": {
+      "type": "string",
+      "description": "Short owner label."
+    }
+  },
+  "required": [
+    "id",
+    "revision"
+  ]
+}
+```
+
+Source: [`packages/board/board/src/tools.ts`](../packages/board/board/src/tools.ts)
+
+### `board_complete`
+
+在 compare-and-set 下把一个看板任务标记为完成。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Task id."
+    },
+    "revision": {
+      "type": "integer",
+      "description": "Current revision from the last read."
+    }
+  },
+  "required": [
+    "id",
+    "revision"
+  ]
+}
+```
+
+Source: [`packages/board/board/src/tools.ts`](../packages/board/board/src/tools.ts)
+
+### `board_create`
+
+向项目看板添加一个任务。任务以 `backlog` 开始；`blockedBy` 列出必须先完成的任务 id。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "workspaceId": {
+      "type": "string",
+      "description": "Owning workspace id."
+    },
+    "title": {
+      "type": "string",
+      "description": "Short task name."
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional detail."
+    },
+    "priority": {
+      "type": "string",
+      "description": "low | normal (default) | high.",
+      "enum": [
+        "low",
+        "normal",
+        "high"
+      ]
+    },
+    "labels": {
+      "type": "array",
+      "description": "Optional labels.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blockedBy": {
+      "type": "array",
+      "description": "Task ids that must reach done first.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "writeScopes": {
+      "type": "array",
+      "description": "Paths or globs this task intends to change.",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "workspaceId",
+    "title"
+  ]
+}
+```
+
+Source: [`packages/board/board/src/tools.ts`](../packages/board/board/src/tools.ts)
+
+### `board_get`
+
+按 id 读取一个看板任务。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Task id."
+    }
+  },
+  "required": [
+    "id"
+  ]
+}
+```
+
+Source: [`packages/board/board/src/tools.ts`](../packages/board/board/src/tools.ts)
+
+### `board_list`
+
+列出项目看板。传入 `readyOnly` 只查看依赖均已完成的�务。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "workspaceId": {
+      "type": "string",
+      "description": "Board to read."
+    },
+    "status": {
+      "type": "string",
+      "description": "Restrict to one status.",
+      "enum": [
+        "backlog",
+        "in_progress",
+        "review",
+        "done",
+        "cancelled",
+        "blocked"
+      ]
+    },
+    "readyOnly": {
+      "type": "boolean",
+      "description": "Only tasks ready to start."
+    }
+  },
+  "required": [
+    "workspaceId"
+  ]
+}
+```
+
+Source: [`packages/board/board/src/tools.ts`](../packages/board/board/src/tools.ts)
+
+### `board_merge`
+
+把已审查的看板任务标记为完成，记录其分支已集成。传入当前修订号。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Task id."
+    },
+    "revision": {
+      "type": "integer",
+      "description": "Current revision from the last read."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional integration note recorded on the task."
+    }
+  },
+  "required": [
+    "id",
+    "revision"
+  ]
+}
+```
+
+Source: [`packages/board/board/src/tools.ts`](../packages/board/board/src/tools.ts)
+
+### `board_update`
+
+修改一个看板任务。传入当前 `revision`；过期修订会失败，你必须用 board_get 或 board_list 重新读取。
+
+```json
+{
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Task id."
+    },
+    "revision": {
+      "type": "integer",
+      "description": "Current revision from the last read."
+    },
+    "title": {
+      "type": "string",
+      "description": "Replacement title."
+    },
+    "description": {
+      "type": "string",
+      "description": "Replacement description."
+    },
+    "priority": {
+      "type": "string",
+      "description": "Replacement priority.",
+      "enum": [
+        "low",
+        "normal",
+        "high"
+      ]
+    },
+    "labels": {
+      "type": "array",
+      "description": "Replacement labels.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "status": {
+      "type": "string",
+      "description": "Replacement status.",
+      "enum": [
+        "backlog",
+        "in_progress",
+        "review",
+        "done",
+        "cancelled",
+        "blocked"
+      ]
+    },
+    "blockedBy": {
+      "type": "array",
+      "description": "Replacement blockers.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "writeScopes": {
+      "type": "array",
+      "description": "Replacement write scopes.",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "revision"
+  ]
+}
+```
+
+Source: [`packages/board/board/src/tools.ts`](../packages/board/board/src/tools.ts)
 
 <a id="deepseek-aidsh-tools"></a>
 

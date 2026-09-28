@@ -9,8 +9,8 @@
   en: 6cc2cd9ced70bb09
   zh: 1c0e6cb4ba2ed637
 /tool-schema-catalog/tool-package-map:
-  en: 72e2a375567f5850
-  zh: b51b8ea5b52814fd
+  en: c2340c268ec1b854
+  zh: e15c19ffecc8c8c6
 /tool-schema-catalog/deepseek-ai-dsh-plugin-manager:
   en: e0143916bb634762
   zh: e0143916bb634762
@@ -54,8 +54,44 @@
   en: e713a4a11a15d13c
   zh: e713a4a11a15d13c
 /tool-schema-catalog/deepseek-ai-dsh-tool-ask-user/ask-user-question:
-  en: f42b7f17ad59577a
-  zh: 7e1eee22ff35d4b1
+  en: 11d4aa43dee7ad42
+  zh: 946fb73c290066ef
+/tool-schema-catalog/deepseek-ai-dsh-memory:
+  en: f82fad0555801413
+  zh: f82fad0555801413
+/tool-schema-catalog/deepseek-ai-dsh-memory/forget:
+  en: efa801a03aa82adc
+  zh: 792ee64ddae870b0
+/tool-schema-catalog/deepseek-ai-dsh-memory/recall:
+  en: ba60b334f8344da5
+  zh: 2b38a6b10cb9b92d
+/tool-schema-catalog/deepseek-ai-dsh-memory/remember:
+  en: af56c5329794489b
+  zh: 9983b9340c836938
+/tool-schema-catalog/deepseek-ai-dsh-board:
+  en: 91d6287562596834
+  zh: 91d6287562596834
+/tool-schema-catalog/deepseek-ai-dsh-board/board-claim:
+  en: adba261fa345f131
+  zh: 9de59278c79c460e
+/tool-schema-catalog/deepseek-ai-dsh-board/board-complete:
+  en: 29280bac3a8ef213
+  zh: bd27e452d59e0dd8
+/tool-schema-catalog/deepseek-ai-dsh-board/board-create:
+  en: 658dd994a1c68812
+  zh: eba67ea63ef591c3
+/tool-schema-catalog/deepseek-ai-dsh-board/board-get:
+  en: d7d9bb4f87fbeeac
+  zh: 566ff2a2443ad4c6
+/tool-schema-catalog/deepseek-ai-dsh-board/board-list:
+  en: ca7ef2d050a0b5ab
+  zh: 5fad0109cf70b809
+/tool-schema-catalog/deepseek-ai-dsh-board/board-merge:
+  en: 696575179ccbefb5
+  zh: 74f616b069af26b6
+/tool-schema-catalog/deepseek-ai-dsh-board/board-update:
+  en: a5fae12d5633b175
+  zh: bcb6948262613b3b
 /tool-schema-catalog/deepseek-ai-dsh-tools:
   en: 76fbbf0fe38aef10
   zh: 76fbbf0fe38aef10
