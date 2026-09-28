@@ -62,7 +62,7 @@ With `auto: true` (which requires a configured `provider`), the executor subscri
 <details>
 <summary>Maintainer details — click to expand</summary>
 
-`planDispatch` is a pure function: it filters ready tasks (status `backlog`, every blocker `done`), orders them by priority then age, and admits each while the in-progress budget allows and its write scopes do not overlap a running or already-selected task. An empty scope set is treated as unknown and conflicts with everything. `runDispatch` then claims each selected task, creates a worktree when isolation is on, starts the run with `cwd` set to that worktree, and settles the task on completion. `WorktreeManager` shells out to `git worktree`.
+`planDispatch` is a pure function: it filters ready tasks (status `backlog`, every blocker `done`), orders them by priority then age, and admits each while the in-progress budget allows and its write scopes do not overlap a running or already-selected task. An empty scope set is treated as unknown and conflicts with everything. `runDispatch` then claims each selected task, creates a worktree when isolation is on, starts the run with `cwd` set to that worktree, and settles the task on completion. `WorktreeManager` shells out to `git worktree`. No invariant companion is published because the dispatcher contains each pass's failure.
 
 | File | Role |
 |---|---|

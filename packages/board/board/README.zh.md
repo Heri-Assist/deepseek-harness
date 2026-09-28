@@ -51,7 +51,7 @@ kind: "package-reference"
 <details>
 <summary>维护者细节——点击展开</summary>
 
-`BoardService` 打开版本 1 的 `board` 存储 domain，并保留一张以任务 id 为键的 `tasks` 表，每条记录带有 `workspaceId`。变更通过进程本地的串行链执行，因此 compare-and-set 不会与同进程内的另一次写入竞争；每次提交写入都会发出 `board/changed`。就绪是任务及其阻塞任务的纯函数，依赖图在每次写入时都会被校验为无环。
+`BoardService` 打开版本 1 的 `board` 存储 domain，并保留一张以任务 id 为键的 `tasks` 表，每条记录带有 `workspaceId`。变更通过进程本地的串行链执行，因此 compare-and-set 不会与同进程内的另一次写入竞争；每次提交写入都会发出 `board/changed`。就绪是任务及其阻塞任务的纯函数，依赖图在每次写入时都会被校验为无环。不发布 invariant 伴随包，因为服务自身校验其图与修订号。
 
 | 文件 | 作用 |
 |---|---|

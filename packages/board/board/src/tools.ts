@@ -67,6 +67,12 @@ const TASK_VIEW_SCHEMA = {
   properties: TASK_PROPERTIES,
 } as const
 
+/** Shared output declaration for every tool that returns one task. */
+const TASK_OUTPUT = {
+  schema: TASK_VIEW_SCHEMA,
+  render: (_args: unknown, value: BoardTaskView) => [{ type: 'text' as const, text: line(value) }],
+} as const
+
 /**
  * Register the board tools on `ctx.tools`.
  * @param ctx - context carrying the tool registry.
@@ -86,10 +92,7 @@ export function registerBoardTools(ctx: Context, board: BoardService): () => voi
       blockedBy: { type: 'array', items: { type: 'string' }, description: 'Task ids that must reach done first.' },
       writeScopes: { type: 'array', items: { type: 'string' }, description: 'Paths or globs this task intends to change.' },
     },
-    output: {
-      schema: TASK_VIEW_SCHEMA,
-      render: (_args, value) => [{ type: 'text', text: line(value) }],
-    },
+    output: TASK_OUTPUT,
     async execute(args, exec) {
       const sessionId = exec.agent?.session.header.id
       return view(await board.create({
@@ -140,10 +143,7 @@ export function registerBoardTools(ctx: Context, board: BoardService): () => voi
     name: 'board_get',
     description: 'Read one board task by id.',
     parameters: { id: { type: 'string', required: true, description: 'Task id.' } },
-    output: {
-      schema: TASK_VIEW_SCHEMA,
-      render: (_args, value) => [{ type: 'text', text: line(value) }],
-    },
+    output: TASK_OUTPUT,
     async execute(args) {
       return view(await board.get(BoardTaskId(args.id)))
     },
@@ -164,10 +164,7 @@ export function registerBoardTools(ctx: Context, board: BoardService): () => voi
       blockedBy: { type: 'array', items: { type: 'string' }, description: 'Replacement blockers.' },
       writeScopes: { type: 'array', items: { type: 'string' }, description: 'Replacement write scopes.' },
     },
-    output: {
-      schema: TASK_VIEW_SCHEMA,
-      render: (_args, value) => [{ type: 'text', text: line(value) }],
-    },
+    output: TASK_OUTPUT,
     async execute(args) {
       return view(await board.update({
         id: BoardTaskId(args.id),
@@ -191,10 +188,7 @@ export function registerBoardTools(ctx: Context, board: BoardService): () => voi
       id: { type: 'string', required: true, description: 'Task id.' },
       revision: { type: 'integer', required: true, description: 'Current revision from the last read.' },
     },
-    output: {
-      schema: TASK_VIEW_SCHEMA,
-      render: (_args, value) => [{ type: 'text', text: line(value) }],
-    },
+    output: TASK_OUTPUT,
     async execute(args) {
       return view(await board.complete(BoardTaskId(args.id), args.revision))
     },
@@ -209,10 +203,7 @@ export function registerBoardTools(ctx: Context, board: BoardService): () => voi
       revision: { type: 'integer', required: true, description: 'Current revision from the last read.' },
       label: { type: 'string', description: 'Short owner label.' },
     },
-    output: {
-      schema: TASK_VIEW_SCHEMA,
-      render: (_args, value) => [{ type: 'text', text: line(value) }],
-    },
+    output: TASK_OUTPUT,
     async execute(args, exec) {
       const sessionId = exec.agent?.session.header.id
       return view(await board.claim(BoardTaskId(args.id), args.revision, {

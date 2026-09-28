@@ -5900,11 +5900,11 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'MemoryQuery',
-    declaration: 'export interface MemoryQuery {\n    readonly text?: string;\n    readonly tags?: readonly string[];\n    readonly match?: \'all\' | \'any\';\n    readonly scope?: MemoryScope;\n    readonly workspaceId?: string;\n    readonly taskId?: string;\n    readonly limit?: number;\n}',
+    declaration: 'export interface MemoryQuery {\n    readonly text?: string | undefined;\n    readonly tags?: readonly string[] | undefined;\n    readonly match?: \'all\' | \'any\' | undefined;\n    readonly scope?: MemoryScope | undefined;\n    readonly workspaceId?: string | undefined;\n    readonly taskId?: string | undefined;\n    readonly limit?: number | undefined;\n}',
   },
   {
     name: 'MemoryRecord',
-    declaration: 'export interface MemoryRecord {\n    readonly id: MemoryId;\n    readonly scope: MemoryScope;\n    readonly workspaceId?: string;\n    readonly taskId?: string;\n    readonly key?: string;\n    readonly tags: readonly string[];\n    readonly text: string;\n    readonly source: MemorySource;\n    readonly pinned: boolean;\n    readonly supersedes?: MemoryId;\n    readonly createdAt: string;\n    readonly updatedAt: string;\n    readonly lastUsedAt?: string;\n    readonly useCount: number;\n}',
+    declaration: 'export interface MemoryRecord {\n    readonly id: MemoryId;\n    readonly scope: MemoryScope;\n    readonly workspaceId?: string;\n    readonly taskId?: string;\n    readonly key?: string;\n    readonly tags: readonly string[];\n    readonly text: string;\n    readonly source: MemorySource;\n    readonly pinned: boolean;\n    readonly createdAt: string;\n    readonly updatedAt: string;\n    readonly lastUsedAt?: string;\n    readonly useCount: number;\n}',
   },
   {
     name: 'MemoryScope',

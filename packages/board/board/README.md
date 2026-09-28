@@ -51,7 +51,7 @@ The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-a
 <details>
 <summary>Maintainer details — click to expand</summary>
 
-`BoardService` opens the version-1 `board` storage domain and keeps one `tasks` table keyed by task id, with `workspaceId` on each record. Mutations run through a process-local chain, so a compare-and-set never races another write in this process; each committed write emits `board/changed`. Readiness is a pure function of the task and its blockers, and the dependency graph is validated as acyclic on every write.
+`BoardService` opens the version-1 `board` storage domain and keeps one `tasks` table keyed by task id, with `workspaceId` on each record. Mutations run through a process-local chain, so a compare-and-set never races another write in this process; each committed write emits `board/changed`. Readiness is a pure function of the task and its blockers, and the dependency graph is validated as acyclic on every write. No invariant companion is published because the service validates its own graph and revisions.
 
 | File | Role |
 |---|---|

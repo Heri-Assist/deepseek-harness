@@ -54,7 +54,7 @@ kind: "package-reference"
 <details>
 <summary>维护者细节——点击展开</summary>
 
-`MemoryStore` 在首次使用时通过 `openMemoryDatabase` 打开数据库，后者会拒绝外来的 SQLite application id，并在 `MEMORY_SCHEMA_VERSION` 变化时重建自有表。`remember` 插入行及其 FTS5 文档，淘汰超出上限的最旧未固定记录，然后在提交后发出 `memory/changed`。`search` 连接 FTS5 索引以过滤已删除行、scope、workspace、task 与标签；`recall` 增加使用计数更新。工具 schema 位于 `src/tools.ts`，通过 `ctx.tools.register` 注册。
+`MemoryStore` 在首次使用时通过 `openMemoryDatabase` 打开数据库，后者会拒绝外来的 SQLite application id，并在 `MEMORY_SCHEMA_VERSION` 变化时重建自有表。`remember` 插入行及其 FTS5 文档，淘汰超出上限的最旧未固定记录，然后在提交后发出 `memory/changed`。`search` 连接 FTS5 索引以过滤已删除行、scope、workspace、task 与标签；`recall` 增加使用计数更新。工具 schema 位于 `src/tools.ts`，通过 `ctx.tools.register` 注册。不发布 invariant 伴随包，因为存储自身强制其输入与 scope 约束。
 
 | 文件 | 作用 |
 |---|---|

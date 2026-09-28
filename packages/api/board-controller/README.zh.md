@@ -44,7 +44,7 @@ kind: "package-reference"
 <details>
 <summary>维护者细节——点击展开</summary>
 
-`BoardController` 继承 `TypertRemoteService`，namespace 为 `board`，带三个 `@Remote` 方法。它把存储的 `BoardTask` 值映射为客户端安全的 `BoardTaskValue` 对象，并从 workspace 的整个任务集计算 `ready`。已知的看板错误变为 `RemoteError('gateway/bad-request', …)`；其他错误变为 `gateway/internal`。生成的 `./typert` 与 `./remote` 产物由仓库宿主构建产出。
+`BoardController` 继承 `TypertRemoteService`，namespace 为 `board`，带三个 `@Remote` 方法。它把存储的 `BoardTask` 值映射为客户端安全的 `BoardTaskValue` 对象，并从 workspace 的整个任务集计算 `ready`。已知的看板错误变为 `RemoteError('gateway/bad-request', …)`；其他错误变为 `gateway/internal`。生成的 `./typert` 与 `./remote` 产物由仓库宿主构建产出。不发布 invariant 伴随包，因为该 owner 不持有运行时状态。
 
 | 文件 | 作用 |
 |---|---|

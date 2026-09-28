@@ -55,7 +55,7 @@ A step is eligible when its incoming text still has a content term after stopwor
 <details>
 <summary>Maintainer details — click to expand</summary>
 
-The plugin registers an `agent/pre-step` listener that runs the existing decision chain, builds a content-term query from the entering messages, searches each eligible scope with `match: 'any'`, ranks the merged hits by FTS5 score, and appends one `user/message` with the `memory-context` source and the `recall` form. It also registers the `memoryContext` session projection, which folds the injected record ids from those messages so a replay re-derives the same dedup state.
+The plugin registers an `agent/pre-step` listener that runs the existing decision chain, builds a content-term query from the entering messages, searches each eligible scope with `match: 'any'`, ranks the merged hits by FTS5 score, and appends one `user/message` with the `memory-context` source and the `recall` form. It also registers the `memoryContext` session projection, which folds the injected record ids from those messages so a replay re-derives the same dedup state. No invariant companion is published because the plugin owns only its registrations.
 
 | File | Role |
 |---|---|

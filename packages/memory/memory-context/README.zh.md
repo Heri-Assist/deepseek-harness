@@ -55,7 +55,7 @@ kind: "package-reference"
 <details>
 <summary>维护者细节——点击展开</summary>
 
-该插件注册一个 `agent/pre-step` 监听器，它运行既有的决策链，从进入消息构建内容词查询，以 `match: 'any'` 搜索每个符合条件的 scope，按 FTS5 分数对合并后的命中排序，并追加一条带 `memory-context` 来源与 `recall` form 的 `user/message`。它还注册 `memoryContext` 会话投影，从这些消息折叠出已注入记录 id，使回放能重新推导出相同的去重状态。
+该插件注册一个 `agent/pre-step` 监听器，它运行既有的决策链，从进入消息构建内容词查询，以 `match: 'any'` 搜索每个符合条件的 scope，按 FTS5 分数对合并后的命中排序，并追加一条带 `memory-context` 来源与 `recall` form 的 `user/message`。它还注册 `memoryContext` 会话投影，从这些消息折叠出已注入记录 id，使回放能重新推导出相同的去重状态。不发布 invariant 伴随包，因为该插件只拥有自身的注册。
 
 | 文件 | 作用 |
 |---|---|

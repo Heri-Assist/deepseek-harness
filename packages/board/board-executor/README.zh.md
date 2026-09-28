@@ -62,7 +62,7 @@ kind: "package-reference"
 <details>
 <summary>维护者细节——点击展开</summary>
 
-`planDispatch` 是纯函数：过滤就绪任务（状态为 `backlog` 且所有阻塞任务为 `done`），按优先级再按时间排序，并在进行中预算允许且写入范围不与运行中或已选中任务重叠时接纳。空 scope 集合视为未知，会与一切冲突。随后 `runDispatch` 认领每个被选中的任务，在开启隔离时创建工作树，以该工作树作为 `cwd` 启动运行，并在完成时结算任务。`WorktreeManager` 通过 shell 调用 `git worktree`。
+`planDispatch` 是纯函数：过滤就绪任务（状态为 `backlog` 且所有阻塞任务为 `done`），按优先级再按时间排序，并在进行中预算允许且写入范围不与运行中或已选中任务重叠时接纳。空 scope 集合视为未知，会与一切冲突。随后 `runDispatch` 认领每个被选中的任务，在开启隔离时创建工作树，以该工作树作为 `cwd` 启动运行，并在完成时结算任务。`WorktreeManager` 通过 shell 调用 `git worktree`。不发布 invariant 伴随包，因为派发器收容每次派发的失败。
 
 | 文件 | 作用 |
 |---|---|

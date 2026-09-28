@@ -44,7 +44,7 @@ Mount it beside [`@deepseek-ai/dsh-board`](../../board/board/README.md). It inje
 <details>
 <summary>Maintainer details — click to expand</summary>
 
-`BoardController` extends `TypertRemoteService` with namespace `board` and three `@Remote` methods. It maps stored `BoardTask` values to client-safe `BoardTaskValue` objects, computing `ready` from the workspace's whole task set. Known board errors become `RemoteError('gateway/bad-request', …)`; anything else becomes `gateway/internal`. The generated `./typert` and `./remote` artifacts are produced by the repository host build.
+`BoardController` extends `TypertRemoteService` with namespace `board` and three `@Remote` methods. It maps stored `BoardTask` values to client-safe `BoardTaskValue` objects, computing `ready` from the workspace's whole task set. Known board errors become `RemoteError('gateway/bad-request', …)`; anything else becomes `gateway/internal`. The generated `./typert` and `./remote` artifacts are produced by the repository host build. No invariant companion is published because the owner holds no runtime state.
 
 | File | Role |
 |---|---|

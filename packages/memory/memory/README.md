@@ -54,7 +54,7 @@ The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-a
 <details>
 <summary>Maintainer details — click to expand</summary>
 
-`MemoryStore` opens the database on first use through `openMemoryDatabase`, which refuses a foreign SQLite application id and rebuilds owned tables when `MEMORY_SCHEMA_VERSION` changes. `remember` inserts the row and its FTS5 document, evicts the oldest unpinned records past the cap, then emits `memory/changed` after the commit. `search` joins the FTS5 index to filter deleted rows, scope, workspace, task, and tags; `recall` adds the use-count update. The tool schemas live in `src/tools.ts` and register through `ctx.tools.register`.
+`MemoryStore` opens the database on first use through `openMemoryDatabase`, which refuses a foreign SQLite application id and rebuilds owned tables when `MEMORY_SCHEMA_VERSION` changes. `remember` inserts the row and its FTS5 document, evicts the oldest unpinned records past the cap, then emits `memory/changed` after the commit. `search` joins the FTS5 index to filter deleted rows, scope, workspace, task, and tags; `recall` adds the use-count update. The tool schemas live in `src/tools.ts` and register through `ctx.tools.register`. No invariant companion is published because the store enforces its own input and scope constraints.
 
 | File | Role |
 |---|---|

@@ -26,21 +26,18 @@ const MEMORY_USER_TABLES = new Set([
   'memories_fts_config',
 ])
 
-/**
- * Exclusively create a missing database file with owner-only permissions.
- * Existing files keep their modes, and errors other than `EEXIST` propagate.
- */
-async function createDatabaseFile(path: string): Promise<void> {
+/** Create a missing store file with owner-only permissions, keeping an existing file untouched. */
+async function ensureOwnerOnlyFile(path: string): Promise<void> {
   try {
-    const handle = await open(path, 'wx', 0o600)
-    await handle.close()
+    await open(path, 'wx', 0o600).then(handle => handle.close())
   } catch (error) {
     /* v8 ignore next -- only EEXIST is reachable; other open() failures are filesystem faults */
     if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error
   }
 }
 
-function listUserTables(db: DatabaseSync): string[] {
+/** Names of the non-system tables this connection already holds. */
+function ownedTableNames(db: DatabaseSync): string[] {
   const rows = db.prepare(
     "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT GLOB 'sqlite_*' ORDER BY name",
   ).all() as Array<{ name: string }>
@@ -91,14 +88,16 @@ export async function openMemoryDatabase(path: string): Promise<DatabaseSync> {
   const actual = path === ':memory:' ? path : resolve(path)
   if (actual !== ':memory:') {
     await mkdir(dirname(actual), { recursive: true, mode: 0o700 })
-    await createDatabaseFile(actual)
+    await ensureOwnerOnlyFile(actual)
   }
   const { DatabaseSync } = await import('node:sqlite')
   const db = new DatabaseSync(actual)
   try {
-    const { application_id: applicationId } = db.prepare('PRAGMA application_id').get() as { application_id: number }
-    const { user_version: version } = db.prepare('PRAGMA user_version').get() as { user_version: number }
-    const userTables = listUserTables(db)
+    const userTables = ownedTableNames(db)
+    const applicationRow = db.prepare('PRAGMA application_id').get() as { application_id: number }
+    const versionRow = db.prepare('PRAGMA user_version').get() as { user_version: number }
+    const applicationId = applicationRow.application_id
+    const version = versionRow.user_version
     if (applicationId !== 0 && applicationId !== MEMORY_APPLICATION_ID) {
       throw new Error(`memory store at "${actual}" belongs to another application`)
     }
