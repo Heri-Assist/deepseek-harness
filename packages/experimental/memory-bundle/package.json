@@ -31,7 +31,8 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@deepseek-ai/dsh-memory": "workspace:*"
+    "@deepseek-ai/dsh-memory": "workspace:*",
+    "@deepseek-ai/dsh-memory-context": "workspace:*"
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "workspace:~"

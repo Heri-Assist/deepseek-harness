@@ -307,6 +307,7 @@ Every package below exports a Cordis plugin that a bundle patch can name in a Lo
 | Package | Config | Description |
 |---|---|---|
 | `@deepseek-ai/dsh-memory` | yes | Durable layered agent memory with FTS5 recall |
+| `@deepseek-ai/dsh-memory-context` | yes | Automatic recall of durable memory into eligible agent steps |
 
 ## plan
 

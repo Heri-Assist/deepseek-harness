@@ -9,17 +9,17 @@
   en: 7fd8ff2c7188721d
   zh: 84ac1afe11080f40
 /deepseek-ai-dsh-experimental-memory-bundle/summary:
-  en: 51fc7719f6565b2f
-  zh: 8dee54a4cbfa1644
+  en: 1a47efd81313e3f3
+  zh: 88be528724337623
 /deepseek-ai-dsh-experimental-memory-bundle/table-of-contents:
   en: d152484eb41ac6b4
   zh: 5b6bd00fce5371c3
 /deepseek-ai-dsh-experimental-memory-bundle/use-this-package:
-  en: 09a6ca6e0372f98e
-  zh: dfabb64cf3381746
+  en: 3ad59f1ecd89337b
+  zh: 1ce021934981fd77
 /deepseek-ai-dsh-experimental-memory-bundle/understand-the-implementation:
-  en: 0dd64451f31798d8
-  zh: b40e4db28fe79eb2
+  en: 651d37c75d2b126e
+  zh: ce293731a3105c4a
 /deepseek-ai-dsh-experimental-memory-bundle/further-exploration:
   en: c979ca40c0b45e24
   zh: 0fc17cea1d7706a5
@@ -38,6 +38,18 @@
 /deepseek-ai-dsh-experimental-memory-bundle/model-experience/memory-tools/kv-cache-effect:
   en: e0841a88249a0b68
   zh: 87daa154c3916808
+/deepseek-ai-dsh-experimental-memory-bundle/model-experience/automatic-recall:
+  en: 6439b4312a56aaf5
+  zh: f1e75985adc44ea5
+/deepseek-ai-dsh-experimental-memory-bundle/model-experience/automatic-recall/what-the-model-sees:
+  en: 624b002c37804603
+  zh: 4e6ff0e85133a00f
+/deepseek-ai-dsh-experimental-memory-bundle/model-experience/automatic-recall/token-effect:
+  en: 7d02180992003690
+  zh: 93d1e24aff17a1b0
+/deepseek-ai-dsh-experimental-memory-bundle/model-experience/automatic-recall/kv-cache-effect:
+  en: 103cb22465b00cda
+  zh: f05b2439aeee1f1f
 /deepseek-ai-dsh-experimental-memory-bundle/known-limitations-and-deferred-work:
   en: 66f2b932a936a363
   zh: 257e56ce936ac1ef

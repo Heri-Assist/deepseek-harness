@@ -123,12 +123,13 @@ function quoteTerm(term: string): string {
  * Build an FTS5 MATCH expression from caller text, or undefined when the text
  * carries no searchable token.
  * @param text - caller-supplied query text.
+ * @param mode - `all` requires every term (default), `any` accepts one.
  * @returns the MATCH expression, or undefined.
  */
-export function buildMatchExpression(text: string): string | undefined {
+export function buildMatchExpression(text: string, mode: 'all' | 'any' = 'all'): string | undefined {
   const tokens = text.match(/[\p{L}\p{N}_]+/gu)
   if (tokens === null || tokens.length === 0) return undefined
-  return tokens.map(quoteTerm).join(' AND ')
+  return tokens.map(quoteTerm).join(mode === 'any' ? ' OR ' : ' AND ')
 }
 
 /** SQLite output value union accepted from a query row. */
@@ -323,7 +324,7 @@ export class MemoryStore extends Service {
       where.push('m.task_id = ?')
       params.push(query.taskId)
     }
-    const match = query.text === undefined ? undefined : buildMatchExpression(query.text)
+    const match = query.text === undefined ? undefined : buildMatchExpression(query.text, query.match ?? 'all')
     let rows: MemoryRow[]
     if (match === undefined) {
       rows = db.prepare(`

@@ -5739,7 +5739,7 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   },
   {
     name: 'MemoryQuery',
-    declaration: 'export interface MemoryQuery {\n    readonly text?: string;\n    readonly tags?: readonly string[];\n    readonly scope?: MemoryScope;\n    readonly workspaceId?: string;\n    readonly taskId?: string;\n    readonly limit?: number;\n}',
+    declaration: 'export interface MemoryQuery {\n    readonly text?: string;\n    readonly tags?: readonly string[];\n    readonly match?: \'all\' | \'any\';\n    readonly scope?: MemoryScope;\n    readonly workspaceId?: string;\n    readonly taskId?: string;\n    readonly limit?: number;\n}',
   },
   {
     name: 'MemoryRecord',

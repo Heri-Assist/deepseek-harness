@@ -25,6 +25,7 @@ kind: "package-group"
 | 包 | 作用 |
 |---|---|
 | [`memory/`](memory/README.zh.md) | 宿主级持久分层记忆，基于 FTS5 召回，并提供 `remember`、`recall` 与 `forget` 工具 |
+| [`memory-context/`](memory-context/README.zh.md) | 将已保存事实自动召回进符合条件的步骤 |
 
 -----
 
@@ -32,6 +33,7 @@ kind: "package-group"
 ## 相关文档
 
 - [记忆包](memory/README.zh.md) — 存储、scope、配置与工具 schema。
+- [记忆召回](memory-context/README.zh.md) — 自动注入规则与边界。
 - [记忆组合包](../experimental/memory-bundle/README.zh.md) — 挂载记忆条目的可选 Bundle。
 - [Agent 记忆子系统](../../docs/subsystems/memory.zh.md) — 记录、scope、来源与召回词汇。
 

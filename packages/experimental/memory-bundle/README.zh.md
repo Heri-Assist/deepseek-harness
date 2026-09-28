@@ -9,7 +9,7 @@ kind: "package-bundle"
 
 ## 概述
 
-此可选 Bundle 插入随发行版交付的组合所不含的那一个记忆条目：`memory`，它拥有 `$DSH_HOME` 下的持久 SQLite 存储，并注册三个模型工具。随包配置默认禁用。
+此可选 Bundle 插入随发行版交付的组合所不含的两个记忆条目：`memory`，它拥有 `$DSH_HOME` 下的持久 SQLite 存储并注册三个模型工具；以及 `memory-context`，它把匹配的已存事实自动召回进符合条件的步骤。随包配置默认禁用。
 
 ## 目录
 
@@ -25,7 +25,7 @@ kind: "package-bundle"
 <a id="use-this-package"></a>
 ## 使用此包
 
-在插件列表中选择 Agent 记忆。活动的根 Agent 随即获得 `remember`、`recall` 与 `forget`，并且在一个会话写入的事实可在同一安装的后续会话中检索到。保留默认的 `global` scope 会让事实跨项目共享；`project` 把记录绑定到一个 workspace id，`task` 绑定到一个看板任务。存储位于 `$DSH_HOME/memory/memory.sqlite`，因此事实能在会话删除与进程重启后存活。禁用该 Bundle 会移除工具，并把这些记录留在磁盘上。
+在插件列表中选择 Agent 记忆。活动的根 Agent 随即获得 `remember`、`recall` 与 `forget`，并且在一个会话写入的事实可在同一安装的后续会话中检索到。保留默认的 `global` scope 会让事实跨项目共享；`project` 把记录绑定到一个 workspace id，`task` 绑定到一个看板任务。进入消息与某条已存 `global` 事实共享内容词的步骤，还会自动收到最佳匹配，每个会话仅一次。存储位于 `$DSH_HOME/memory/memory.sqlite`，因此事实能在会话删除与进程重启后存活。禁用该 Bundle 会移除工具与自动召回，并把这些记录留在磁盘上。
 
 -----
 
@@ -35,12 +35,12 @@ kind: "package-bundle"
 <details>
 <summary>维护者细节——点击展开</summary>
 
-`cordis.patch.yml` 插入 `memory` 条目，`package.json` 依赖 `@deepseek-ai/dsh-memory`，因此该条目从此 Bundle 解析。不发布运行时 invariant 伴随包，因为存储自身的约束由服务内部强制执行。
+`cordis.patch.yml` 插入 `memory` 与 `memory-context` 条目，`package.json` 依赖这两个包，因此条目从此 Bundle 解析。不发布运行时 invariant 伴随包，因为存储自身的约束由服务内部强制执行。
 
 | 文件 | 作用 |
 |---|---|
-| [`cordis.patch.yml`](cordis.patch.yml) | 插入 `memory` 条目 |
-| [`package.json`](package.json) | 把该条目所属包列为依赖 |
+| [`cordis.patch.yml`](cordis.patch.yml) | 插入 `memory` 与 `memory-context` 条目 |
+| [`package.json`](package.json) | 把条目所属包列为依赖 |
 | [`locale/en.json`](locale/en.json), [`locale/zh.json`](locale/zh.json) | 插件管理页的标题与描述 |
 | [`src/index.ts`](src/index.ts) | 空的模块入口；patch 才是运行时内容 |
 
@@ -72,6 +72,20 @@ kind: "package-bundle"
 #### KV Cache 影响
 
 工具 schema 在 Bundle 挂载时改变一次请求前缀；召回结果是该前缀之后的新内容，因此既有条目不会被失效。
+
+### 自动召回
+
+#### 模型看到什么
+
+进入消息与某条已存 `global` 事实共享内容词的步骤，会额外收到一个持久用户消息，内容是最佳匹配（至多配置上限），并以“来自早前会话的不可信笔记”为前缀。同一记录在一个会话内不会被重复注入。
+
+#### Token 影响
+
+每个符合条件的步骤追加一个有界的用户消息，受配置的记录数与字符预算限制；词语不匹配任何记录的步骤不会追加内容。
+
+#### KV Cache 影响
+
+注入的消息是稳定请求前缀之后的新可见内容，因此既有条目不会被失效。
 
 ## 已知限制与后续工作
 

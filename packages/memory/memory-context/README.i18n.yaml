@@ -1,0 +1,49 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/memory/memory-context/README.md
+/:
+  en: 930b7985f067c378
+  zh: b841fbc13691e108
+/deepseek-ai-dsh-memory-context:
+  en: b83a65dae04d449b
+  zh: c7da76319084afec
+/deepseek-ai-dsh-memory-context/summary:
+  en: 22331c3c1288bf4a
+  zh: bc8bb887ad0d58f6
+/deepseek-ai-dsh-memory-context/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 5b6bd00fce5371c3
+/deepseek-ai-dsh-memory-context/use-this-package:
+  en: a1d03132792e952d
+  zh: bd4d64cc30db19fb
+/deepseek-ai-dsh-memory-context/use-this-package/when-it-injects:
+  en: a7467f496b121186
+  zh: fa270f6ba0fe0883
+/deepseek-ai-dsh-memory-context/understand-the-implementation:
+  en: fba37ffa57e7222b
+  zh: ac3e9599cd891beb
+/deepseek-ai-dsh-memory-context/further-exploration:
+  en: 46c1c65ee2da9125
+  zh: 25039e93f4602693
+/deepseek-ai-dsh-memory-context/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-memory-context/model-experience/automatic-recall-message:
+  en: d136ec09a21a3418
+  zh: 040db748800d78b4
+/deepseek-ai-dsh-memory-context/model-experience/automatic-recall-message/what-the-model-sees:
+  en: 4634d1258b5f18bd
+  zh: 98ecebf3e57d4b6d
+/deepseek-ai-dsh-memory-context/model-experience/automatic-recall-message/token-effect:
+  en: e91d8ceaa8380eaf
+  zh: 45c19c532f45d02d
+/deepseek-ai-dsh-memory-context/model-experience/automatic-recall-message/kv-cache-effect:
+  en: d349031ba6dc5cc1
+  zh: f657b9ee8209a52d
+/deepseek-ai-dsh-memory-context/known-limitations-and-deferred-work:
+  en: 8f6b67bb956a0818
+  zh: c04ba66c7f898716
+/deepseek-ai-dsh-memory-context/known-limitations-and-deferred-work/dev-note:
+  en: 0225ba087c5266f3
+  zh: 53f5adbcc7db8671

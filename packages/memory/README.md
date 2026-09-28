@@ -25,6 +25,7 @@ This group owns the harness's durable memory store: facts, decisions, and prefer
 | Package | Role |
 |---|---|
 | [`memory/`](memory/README.md) | Durable Host-wide layered memory with FTS5 recall and the `remember`, `recall`, and `forget` tools |
+| [`memory-context/`](memory-context/README.md) | Automatic recall of saved facts into eligible steps |
 
 -----
 
@@ -32,6 +33,7 @@ This group owns the harness's durable memory store: facts, decisions, and prefer
 ## Related documentation
 
 - [Memory package](memory/README.md) — store, scopes, config, and tool schemas.
+- [Memory recall](memory-context/README.md) — automatic injection rules and bounds.
 - [Memory bundle](../experimental/memory-bundle/README.md) — optional bundle that mounts the memory row.
 - [Agent memory subsystem](../../docs/subsystems/memory.md) — record, scope, source, and retrieval vocabulary.
 

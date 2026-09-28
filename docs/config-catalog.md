@@ -2107,6 +2107,30 @@ export interface Config {
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-memory -->
 
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-memory-context -->
+<a id="deepseek-aidsh-memory-context"></a>
+
+## `@deepseek-ai/dsh-memory-context`
+
+- `inject`: `memory` · `agents` · `sessionProjections`
+- `refs`: [`MemoryScope`](../packages/memory/memory/src/index.ts)
+- `source`: [`packages/memory/memory-context/src/index.ts:68`](../packages/memory/memory-context/src/index.ts)
+
+```ts config-catalog
+/** Automatic recall configuration. Invalid values fail plugin load. */
+export interface Config {
+  /** Scopes searched for automatic injection; defaults to `['global']`. */
+  scopes?: MemoryScope[]
+  /** Maximum records appended in one step; defaults to 3. */
+  limit?: number
+  /** Maximum total characters appended in one step; defaults to 2000. */
+  maxChars?: number
+  /** Minimum milliseconds between injections in one session; 0 injects at every eligible step; defaults to 0. */
+  refreshIntervalMs?: number
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-memory-context -->
+
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-message-feedback -->
 <a id="deepseek-aidsh-message-feedback"></a>
 

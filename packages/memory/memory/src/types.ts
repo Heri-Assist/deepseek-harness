@@ -102,6 +102,11 @@ export interface MemoryQuery {
   readonly text?: string
   /** Labels a record must carry; all must match. */
   readonly tags?: readonly string[]
+  /**
+   * How text terms combine: `all` requires every term (default), `any` accepts
+   * a record matching at least one and lets FTS5 rank order the results.
+   */
+  readonly match?: 'all' | 'any'
   /** Restrict to one layer. */
   readonly scope?: MemoryScope
   /** Restrict to one workspace. */

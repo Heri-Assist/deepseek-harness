@@ -28,14 +28,17 @@ describe('experimental memory bundle', () => {
     expect(manifest.dsh?.bundle?.patch).toBe('./cordis.patch.yml')
     expect(manifest.exports?.['./locale/*.json']).toBe('./locale/*.json')
     expect(manifest.exports?.['./cordis.patch.yml']).toBe('./cordis.patch.yml')
-    // The inserted row names a package the bundle depends on, so it resolves from the bundle.
-    expect(Object.keys(manifest.dependencies ?? {}).sort()).toEqual(['@deepseek-ai/dsh-memory'])
+    // Each inserted row names a package the bundle depends on, so the rows resolve from the bundle.
+    expect(Object.keys(manifest.dependencies ?? {}).sort()).toEqual([
+      '@deepseek-ai/dsh-memory', '@deepseek-ai/dsh-memory-context',
+    ])
   })
 
-  it('inserts the memory row switched on', () => {
+  it('inserts the memory and memory-context rows switched on', () => {
     const parsed = yaml.load(readFileSync(resolve(root, './cordis.patch.yml'), 'utf8'), { schema: entryListSchema })
     expect(parsed).toEqual([{ insert: [
       { id: 'memory', name: '@deepseek-ai/dsh-memory' },
+      { id: 'memory-context', name: '@deepseek-ai/dsh-memory-context' },
     ] }])
   })
 })
