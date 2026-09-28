@@ -54,7 +54,7 @@ export function registerMemoryTools(ctx: Context, memory: MemoryStore): () => vo
       const sessionId = exec.agent?.session.header.id
       const record = await memory.remember({
         text: args.text,
-        provenance: {
+        source: {
           origin: 'explicit',
           ...sessionId === undefined ? {} : { sessionId },
           toolCallId: String(exec.callId),
@@ -89,6 +89,7 @@ export function registerMemoryTools(ctx: Context, memory: MemoryStore): () => vo
         properties: {
           records: {
             type: 'array',
+            required: true,
             items: {
               type: 'object',
               additionalProperties: false,

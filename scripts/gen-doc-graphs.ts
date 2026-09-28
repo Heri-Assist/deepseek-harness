@@ -611,6 +611,13 @@ const SERVICE_ROLES: ServiceRole[] = [
     note: 'Stores tasks independently of Session activation and queues due messages in the original Session.',
   },
   {
+    key: 'memory',
+    pkg: 'memory',
+    title: 'Durable layered agent memory',
+    mode: 'core',
+    note: 'Owns one FTS5 store under $DSH_HOME and registers the remember, recall, and forget tools.',
+  },
+  {
     key: 'goals',
     pkg: 'goal',
     title: 'Same-session goal domain',

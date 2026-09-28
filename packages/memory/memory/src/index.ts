@@ -81,7 +81,7 @@ interface MemoryRow {
   key: string | null
   text: string
   tags: string
-  provenance: string
+  source: string
   pinned: number
   supersedes: string | null
   created_at: string
@@ -175,7 +175,7 @@ function toMemoryRow(row: Record<string, SqlValue>): MemoryRow {
     key: readOptionalString(row, 'key'),
     text: readRequiredString(row, 'text'),
     tags: readRequiredString(row, 'tags'),
-    provenance: readRequiredString(row, 'provenance'),
+    source: readRequiredString(row, 'source'),
     pinned: readRequiredNumber(row, 'pinned'),
     supersedes: readOptionalString(row, 'supersedes'),
     created_at: readRequiredString(row, 'created_at'),
@@ -192,7 +192,7 @@ function rowToRecord(row: MemoryRow): MemoryRecord {
     scope: row.scope as MemoryScope,
     tags: JSON.parse(row.tags) as string[],
     text: row.text,
-    provenance: JSON.parse(row.provenance) as MemoryRecord['provenance'],
+    source: JSON.parse(row.source) as MemoryRecord['source'],
     pinned: row.pinned !== 0,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -208,7 +208,7 @@ function rowToRecord(row: MemoryRow): MemoryRecord {
 
 /**
  * Durable, Host-wide layered memory. Writes and reads are independent of any
- * Session; provenance links each record to the work that produced it.
+ * Session; source links each record to the work that produced it.
  */
 export class MemoryStore extends Service {
   static inject = ['tools']
@@ -241,7 +241,7 @@ export class MemoryStore extends Service {
 
   /**
    * Persist one fact.
-   * @param input - the fact, its scope, and its provenance.
+   * @param input - the fact, its scope, and its source.
    * @returns the stored record.
    * @throws {@link MemoryInputError} when the input violates a store constraint.
    */
@@ -261,7 +261,7 @@ export class MemoryStore extends Service {
       scope,
       tags,
       text,
-      provenance: input.provenance,
+      source: input.source,
       pinned: input.pinned ?? false,
       createdAt: now,
       updatedAt: now,
@@ -273,11 +273,11 @@ export class MemoryStore extends Service {
     const db = await this.ready
     db.prepare(`
       INSERT INTO memories
-        (id, scope, workspace_id, task_id, key, text, tags, provenance, pinned, created_at, updated_at, use_count)
+        (id, scope, workspace_id, task_id, key, text, tags, source, pinned, created_at, updated_at, use_count)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       record.id, record.scope, workspaceId ?? null, taskId ?? null, key ?? null, text,
-      JSON.stringify(tags), JSON.stringify(input.provenance), record.pinned ? 1 : 0, now, now, 0,
+      JSON.stringify(tags), JSON.stringify(input.source), record.pinned ? 1 : 0, now, now, 0,
     )
     db.prepare('INSERT INTO memories_fts (id, text, tags) VALUES (?, ?, ?)').run(record.id, text, tags.join(' '))
     await this.evictScope(db, record.scope, workspaceId, taskId)

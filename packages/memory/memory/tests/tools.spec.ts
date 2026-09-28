@@ -60,8 +60,8 @@ describe('memory tools through the agent loop', () => {
     }
     const hits = await ctx.memory.recall({ text: 'queue drains' })
     expect(hits).toHaveLength(1)
-    expect(hits[0]?.record.provenance.origin).toBe('explicit')
-    expect(hits[0]?.record.provenance.sessionId).toBe('it-memory')
+    expect(hits[0]?.record.source.origin).toBe('explicit')
+    expect(hits[0]?.record.source.sessionId).toBe('it-memory')
   })
 
   it('model calls forget: the record leaves recall', async () => {

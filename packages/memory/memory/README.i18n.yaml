@@ -1,0 +1,49 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/memory/memory/README.md
+/:
+  en: 669f48911702250e
+  zh: a458b8d7e5b5db00
+/deepseek-ai-dsh-memory:
+  en: bbf00b4347d57138
+  zh: dc66c1ce3d7fb64d
+/deepseek-ai-dsh-memory/summary:
+  en: 4cc672e5685585e2
+  zh: de96bd24786e4f83
+/deepseek-ai-dsh-memory/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 5b6bd00fce5371c3
+/deepseek-ai-dsh-memory/use-this-package:
+  en: 93f3470e24d260bd
+  zh: 02974572c0e2e1a7
+/deepseek-ai-dsh-memory/use-this-package/what-each-call-does:
+  en: 720e045b3e40da49
+  zh: cd671d8f21cabf2d
+/deepseek-ai-dsh-memory/understand-the-implementation:
+  en: 10d322cc7ebbae20
+  zh: 58ae20372e86f8e1
+/deepseek-ai-dsh-memory/further-exploration:
+  en: 18fb4fb461882717
+  zh: a96da0c12d04bae6
+/deepseek-ai-dsh-memory/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-memory/model-experience/memory-tools:
+  en: b160ca92da193ddb
+  zh: 337cb883c2dc3d7d
+/deepseek-ai-dsh-memory/model-experience/memory-tools/what-the-model-sees:
+  en: 06484e2942d847aa
+  zh: e11d61a0583fd525
+/deepseek-ai-dsh-memory/model-experience/memory-tools/token-effect:
+  en: 646a033bdb6c4d30
+  zh: 37fd04a282b7fdca
+/deepseek-ai-dsh-memory/model-experience/memory-tools/kv-cache-effect:
+  en: 2d17a51e2ffae278
+  zh: 8f1acca29988646c
+/deepseek-ai-dsh-memory/known-limitations-and-deferred-work:
+  en: 397f9d48d7c29ccb
+  zh: e6a0bf33ce7f1ac7
+/deepseek-ai-dsh-memory/known-limitations-and-deferred-work/dev-note:
+  en: 0225ba087c5266f3
+  zh: 53f5adbcc7db8671

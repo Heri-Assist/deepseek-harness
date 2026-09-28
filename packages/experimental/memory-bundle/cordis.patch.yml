@@ -1,0 +1,7 @@
+# Experimental durable layered memory over the shipped composition, which carries
+# no memory rows. The service owns one SQLite store under $DSH_HOME and registers
+# the remember, recall, and forget model tools for every live root Agent.
+
+- insert:
+    - id: memory
+      name: '@deepseek-ai/dsh-memory'

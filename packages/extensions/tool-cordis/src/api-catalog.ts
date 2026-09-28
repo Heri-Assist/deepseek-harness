@@ -1492,6 +1492,44 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'memory',
+    summary: 'Durable, Host-wide layered memory.',
+    description: 'Durable, Host-wide layered memory. Writes and reads are independent of any Session; source links each record to the work that produced it.',
+    methods: [
+      {
+        signature: 'async remember(input: RememberInput): Promise<MemoryRecord>',
+        description: 'Persist one fact.',
+        parameters: [{ name: 'input', description: 'the fact, its scope, and its source.' }],
+        returns: 'the stored record.',
+        throws: ['{@link MemoryInputError} when the input violates a store constraint.'],
+      },
+      {
+        signature: 'async recall(query: MemoryQuery): Promise<MemoryHit[]>',
+        description: 'Search records and mark every returned record as used.',
+        parameters: [{ name: 'query', description: 'text, tag, and scope filters.' }],
+        returns: 'ranked hits.',
+      },
+      {
+        signature: 'async search(query: MemoryQuery): Promise<MemoryHit[]>',
+        description: 'Search records without marking them used.',
+        parameters: [{ name: 'query', description: 'text, tag, and scope filters.' }],
+        returns: 'ranked hits.',
+      },
+      {
+        signature: 'async forget(id: MemoryId): Promise<boolean>',
+        description: 'Soft-delete one record, keeping an auditable tombstone.',
+        parameters: [{ name: 'id', description: 'the record identity.' }],
+        returns: 'true when an active record was forgotten.',
+      },
+      {
+        signature: 'async list(query: MemoryQuery = {}): Promise<MemoryRecord[]>',
+        description: 'List active records, newest first.',
+        parameters: [{ name: 'query', description: 'optional scope filters.' }],
+        returns: 'the matching records.',
+      },
+    ],
+  },
+  {
     key: 'messageFeedback',
     summary: 'Session-log service; cold operations never construct a Session or Agent.',
     description: 'Session-log service; cold operations never construct a Session or Agent.',
@@ -4108,6 +4146,14 @@ export const EVENT_API: readonly EventApiEntry[] = [
     parameters: [{ name: 'options', description: 'the full request. A LOOP-built request carries the process-local {@link markAgentLoopRequest} identity and arrives deep-frozen (mutation throws): its content is a pure function of the session log (the reconstructability Agent Note), so listeners read it, never rewrite it. Hand-built calls do not carry that marker; callers own their request inputs and must keep them unchanged until the stream settles.' }],
   },
   {
+    name: 'memory/changed',
+    mode: 'emit',
+    signature: '\'memory/changed\'(): void',
+    summary: 'A memory record was written, updated, or forgotten; clients refetch.',
+    description: 'A memory record was written, updated, or forgotten; clients refetch.',
+    parameters: [],
+  },
+  {
     name: 'permission-presets/catalog-changed',
     mode: 'emit',
     signature: '\'permission-presets/catalog-changed\'(): void',
@@ -5680,6 +5726,34 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type McpResourceRequest = {\n    method: \'resources/list\' | \'resources/templates/list\';\n    cursor?: string;\n} | {\n    method: \'resources/read\';\n    uri: string;\n};',
   },
   {
+    name: 'MemoryHit',
+    declaration: 'export interface MemoryHit {\n    readonly record: MemoryRecord;\n    readonly rank: number;\n}',
+  },
+  {
+    name: 'MemoryId',
+    declaration: 'export type MemoryId = Branded<\'MemoryId\'>;',
+  },
+  {
+    name: 'MemoryOrigin',
+    declaration: 'export type MemoryOrigin = \'explicit\' | \'extracted\';',
+  },
+  {
+    name: 'MemoryQuery',
+    declaration: 'export interface MemoryQuery {\n    readonly text?: string;\n    readonly tags?: readonly string[];\n    readonly scope?: MemoryScope;\n    readonly workspaceId?: string;\n    readonly taskId?: string;\n    readonly limit?: number;\n}',
+  },
+  {
+    name: 'MemoryRecord',
+    declaration: 'export interface MemoryRecord {\n    readonly id: MemoryId;\n    readonly scope: MemoryScope;\n    readonly workspaceId?: string;\n    readonly taskId?: string;\n    readonly key?: string;\n    readonly tags: readonly string[];\n    readonly text: string;\n    readonly source: MemorySource;\n    readonly pinned: boolean;\n    readonly supersedes?: MemoryId;\n    readonly createdAt: string;\n    readonly updatedAt: string;\n    readonly lastUsedAt?: string;\n    readonly useCount: number;\n}',
+  },
+  {
+    name: 'MemoryScope',
+    declaration: 'export type MemoryScope = \'global\' | \'project\' | \'task\';',
+  },
+  {
+    name: 'MemorySource',
+    declaration: 'export interface MemorySource {\n    readonly sessionId?: SessionId;\n    readonly eventSeq?: number;\n    readonly toolCallId?: string;\n    readonly origin: MemoryOrigin;\n}',
+  },
+  {
     name: 'Message',
     declaration: 'export type Message = MessageRoleMap[keyof MessageRoleMap];',
   },
@@ -6150,6 +6224,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'Reload',
     declaration: 'export interface Reload {\n    filename: string;\n    runtime?: Plugin.Runtime | undefined;\n}',
+  },
+  {
+    name: 'RememberInput',
+    declaration: 'export interface RememberInput {\n    readonly text: string;\n    readonly scope?: MemoryScope;\n    readonly key?: string;\n    readonly tags?: readonly string[];\n    readonly workspaceId?: string;\n    readonly taskId?: string;\n    readonly pinned?: boolean;\n    readonly source: MemorySource;\n}',
   },
   {
     name: 'RemoteError',

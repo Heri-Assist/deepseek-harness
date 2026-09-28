@@ -9,16 +9,16 @@
   en: 6781970f2bf38a5e
   zh: e0ee06e8710fe804
 /agent-note-layered-agent-memory/proposal:
-  en: e850eb05c80ca80c
+  en: aa7dec15c95263dd
   zh: de6fac226aa5ac72
 /agent-note-layered-agent-memory/proposal/memory-model:
-  en: a23f772a8c26f780
+  en: d5179f4c11ce708c
   zh: ccc5d93e143f38e0
 /agent-note-layered-agent-memory/proposal/scopes-and-lifecycle:
   en: f6415057101908a3
   zh: f54f9daed9c76cbd
 /agent-note-layered-agent-memory/proposal/retrieval-and-injection:
-  en: 53d2d73c19d28244
+  en: 6a30073544ae36d6
   zh: 66a70438aa105568
 /agent-note-layered-agent-memory/proposal/context-efficiency:
   en: f426df4cfacc0979
@@ -27,7 +27,7 @@
   en: 6119e2aff3b6be5a
   zh: 6119e2aff3b6be5a
 /agent-note-layered-agent-memory/alternatives-considered/why-not-ship-only-the-external-mcp-memory-servers:
-  en: 3ee903b004df0a94
+  en: 144066adfc3ccb02
   zh: 3d3e144f6127a4e9
 /agent-note-layered-agent-memory/alternatives-considered/why-not-embeddings-and-a-vector-store:
   en: edde9420cbcaa0a7
@@ -39,8 +39,8 @@
   en: 9949ff341376de90
   zh: cd82d0c4698af5a8
 /agent-note-layered-agent-memory/acceptance-criteria:
-  en: 465b5d5c933b0ecc
+  en: 64c33b87a3fea6ff
   zh: ed661d27ae11c0ad
 /agent-note-layered-agent-memory/risks:
-  en: 60093727c2c6065e
+  en: b948246d7ff78ae3
   zh: 2db6df1fb63e2db7

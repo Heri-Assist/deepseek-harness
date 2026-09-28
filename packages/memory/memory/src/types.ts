@@ -1,6 +1,6 @@
 /**
  * Vocabulary of the durable layered memory store: record identity, scope,
- * provenance, write and query inputs, and ranked results.
+ * source, write and query inputs, and ranked results.
  *
  * @module @deepseek-ai/dsh-memory
  */
@@ -33,7 +33,7 @@ export const MEMORY_SCOPES: readonly MemoryScope[] = ['global', 'project', 'task
 export type MemoryOrigin = 'explicit' | 'extracted'
 
 /** Durable source of one record, retained for audit and review. */
-export interface MemoryProvenance {
+export interface MemorySource {
   /** Session whose work produced the fact, when one owns it. */
   readonly sessionId?: SessionId
   /** Session-log sequence of the producing event, when known. */
@@ -44,7 +44,7 @@ export interface MemoryProvenance {
   readonly origin: MemoryOrigin
 }
 
-/** One durable fact with its scope, tags, and provenance. */
+/** One durable fact with its scope, tags, and source. */
 export interface MemoryRecord {
   /** Stable identity. */
   readonly id: MemoryId
@@ -61,7 +61,7 @@ export interface MemoryRecord {
   /** The remembered fact. */
   readonly text: string
   /** Where the fact came from. */
-  readonly provenance: MemoryProvenance
+  readonly source: MemorySource
   /** Pinned records survive scope eviction and are re-injected after compaction. */
   readonly pinned: boolean
   /** Record this one replaces, when the write superseded an earlier fact. */
@@ -93,7 +93,7 @@ export interface RememberInput {
   /** Pin the record against scope eviction. */
   readonly pinned?: boolean
   /** Where the fact came from. */
-  readonly provenance: MemoryProvenance
+  readonly source: MemorySource
 }
 
 /** Input to `recall`, `search`, and `list`. */
