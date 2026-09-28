@@ -24,6 +24,7 @@
     "./locale/*.json": "./locale/*.json"
   },
   "files": [
+    "icon.svg",
     "locale/*.json",
     "lib/index.js",
     "cordis.patch.yml",
@@ -46,5 +47,6 @@
     "bundle": {
       "patch": "./cordis.patch.yml"
     }
-  }
+  },
+  "icon": "./icon.svg"
 }
