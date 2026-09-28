@@ -46,6 +46,7 @@ const NO_MODEL_EXPERIENCE_SECTION: Readonly<Record<string, string>> = {
  */
 const SENTENCE_MODEL_EXPERIENCE: Readonly<Record<string, SentenceContract>> = {
   'packages/api/board-controller': { kind: 'none', reason: 'The Remote owner exposes board reads and writes to the browser; it registers no model context.' },
+  'packages/client/ui-board': { kind: 'none', reason: 'The header summary and task rows are browser UI copy; no board text enters a model request through this package.' },
   'packages/board/board-executor': { kind: 'indirect', reason: 'The executor starts delegated subagent runs; the subagent packages own what each child sees.' },
   'packages/client/product-analytics': { kind: 'none', reason: 'Desktop analytics observes selected interactions without contributing model context or Session events.' },
   'packages/experimental/speech-to-text': { kind: 'none', reason: 'Routes transient recognition without adding model requests or Session events.' },

@@ -370,6 +370,8 @@
     # record panels over the session job-output service.
     - id: ui-jobs
       name: '@deepseek-ai/dsh-client-ui-jobs'
+    - id: ui-board
+      name: '@deepseek-ai/dsh-client-ui-board'
 
     # Goal surface: GoalBar in the input dock over the goal session projection.
     - id: ui-goal
