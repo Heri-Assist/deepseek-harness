@@ -40,12 +40,15 @@ kind: "package-reference"
 | `limit` | `3` | 单步追加的最大记录数 |
 | `maxChars` | `2000` | 单步追加的最大字符总数 |
 | `refreshIntervalMs` | `0` | 一个会话内两次注入之间的最小间隔；`0` 表示每个符合条件的步骤都注入 |
+| `workspaceId` | 无 | 绑定到 `project` 与 `task` scope 搜索的 workspace；缺少它时不会搜索这些 scope |
+| `extractOnCompaction` | `false` | 从每个已提交的 compaction 摘要中抽取一条持久事实 |
+| `extractionMaxChars` | `500` | 单条抽取事实的字符预算 |
 
 生成式[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-memory-context)是这些已接受字段的详尽来源。
 
 ### 何时注入
 
-当进入文本在去掉停用词与极短词语后仍含内容词、某个符合条件 scope 中至少有一条已存记录匹配其中一个词，且该批次没有任何记录已在本会话注入过时，该步骤即符合条件。没有任何内容词匹配时不追加内容。
+当进入文本在去掉停用词与极短词语后仍含内容词、某个符合条件 scope 中至少有一条已存记录匹配其中一个词，且该批次没有任何记录已在本会话注入过时，该步骤即符合条件。没有任何内容词匹配时不追加内容。开启 `extractOnCompaction` 时，每个已提交摘要还会作为一条带 `compaction-summary` 标签的 `project` scope 事实存储，落在绑定 workspace 或会话工作目录；存储失败绝不改变 compaction 结果。
 
 -----
 
@@ -95,10 +98,10 @@ kind: "package-reference"
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- 默认只有 `global` scope 符合条件；把 `project` 或 `task` 记录绑定到会话需要本插件尚未解析的 workspace 身份。
+- 默认只有 `global` scope 符合条件；搜索 `project` 或 `task` 需要配置 `workspaceId`。
+- 抽取只读取 compaction 摘要；没有任何东西从普通轮次推导事实。
 - 匹配是对内容词的精确 FTS5 搜索；它不对改述或语义相似度排序。
 - 查询由英文停用词表过滤；其他语言退回到长度过滤。
-- 该插件只注入、不抽取：没有任何东西从对话中推导新事实。
 
 -----
 

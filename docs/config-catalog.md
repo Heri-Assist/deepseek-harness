@@ -2160,7 +2160,7 @@ export interface Config {
 
 - `inject`: `memory` · `agents` · `sessionProjections`
 - `refs`: [`MemoryScope`](../packages/memory/memory/src/index.ts)
-- `source`: [`packages/memory/memory-context/src/index.ts:65`](../packages/memory/memory-context/src/index.ts)
+- `source`: [`packages/memory/memory-context/src/index.ts:66`](../packages/memory/memory-context/src/index.ts)
 
 ```ts config-catalog
 /** Automatic recall configuration. Invalid values fail plugin load. */
@@ -2173,6 +2173,12 @@ export interface Config {
   maxChars?: number
   /** Minimum milliseconds between injections in one session; 0 injects at every eligible step; defaults to 0. */
   refreshIntervalMs?: number
+  /** Workspace bound to `project` and `task` scopes; required to search either. */
+  workspaceId?: string
+  /** Extract durable facts from each committed compaction summary; defaults to false. */
+  extractOnCompaction?: boolean
+  /** Character budget for one extracted fact; defaults to 500. */
+  extractionMaxChars?: number
 }
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-memory-context -->

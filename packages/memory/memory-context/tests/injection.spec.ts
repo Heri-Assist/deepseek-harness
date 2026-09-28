@@ -116,12 +116,12 @@ describe('memory-context automatic recall through the agent loop', () => {
   })
 
   it('ranks multiple matches and stops at the character budget', async () => {
-    const adapter = new MockAdapter([textResponse('Done.')])
     const ctx = new Context()
     await mountAgentLoopTestDependencies(ctx)
     await ctx.plugin(AgentLoop, { agents: [] })
     await ctx.plugin(MemoryStore, { databasePath: ':memory:' })
     await ctx.plugin(MemoryContext, { scopes: ['global'], limit: 2, maxChars: 20, refreshIntervalMs: 0 })
+    const adapter = new MockAdapter([textResponse('Done.')])
     ctx.llm.registerAdapter(['mock'], adapter)
     await ctx.memory.remember({ text: 'alpha release note one', source: { origin: 'explicit' } })
     await ctx.memory.remember({ text: 'alpha release note two', source: { origin: 'explicit' } })
@@ -133,5 +133,44 @@ describe('memory-context automatic recall through the agent loop', () => {
     const message = first[0]
     if (message === undefined || message.type !== 'user/message') throw new Error('expected an injected message')
     expect(message.data.content.flatMap(block => block.type === 'text' ? [block.text] : [])[0]?.split('\n')).toHaveLength(2)
+  })
+
+  it('searches a bound project workspace and extracts facts from compaction summaries', async () => {
+    const ctx = new Context()
+    await mountAgentLoopTestDependencies(ctx)
+    await ctx.plugin(AgentLoop, { agents: [] })
+    await ctx.plugin(MemoryStore, { databasePath: ':memory:' })
+    await ctx.plugin(MemoryContext, {
+      scopes: ['project'], workspaceId: 'ws-1', limit: 2, maxChars: 1000, refreshIntervalMs: 0,
+      extractOnCompaction: true, extractionMaxChars: 40,
+    })
+    const adapter = new MockAdapter([textResponse('Done.')])
+    ctx.llm.registerAdapter(['mock'], adapter)
+    await ctx.memory.remember({ text: 'project alpha convention', scope: 'project', workspaceId: 'ws-1', source: { origin: 'explicit' } })
+    await ctx.memory.remember({ text: 'other project alpha fact', scope: 'project', workspaceId: 'ws-2', source: { origin: 'explicit' } })
+
+    const agent = await ctx.agentLoop.create(SessionId('it-memory-context-project'), { provider: 'mock', model: 'mock' })
+    agent.followup(createUserMessage({ content: [{ type: 'text', text: 'alpha convention' }], source: { kind: 'user' } }))
+    await waitForIdle(ctx, agent)
+    const message = injected(agent.session.snapshotEvents())[0]
+    if (message === undefined || message.type !== 'user/message') throw new Error('expected an injected message')
+    const body = message.data.content.flatMap(block => block.type === 'text' ? [block.text] : []).join('')
+    expect(body).toContain('project alpha convention')
+    expect(body).not.toContain('other project alpha fact')
+
+    // A committed compaction summary is extracted into project memory at the bound workspace.
+    agent.session.append('compaction/summary', {
+      compactionId: 'c-1' as never,
+      summary: [{ type: 'text', text: 'Decision: the queue drains before storage closes.' }],
+      shadowedRange: { start: 0 as never, end: 0 as never },
+      shadowedSeqs: [],
+      shadowedTokenCount: 0,
+      provider: 'mock',
+      model: 'mock',
+    })
+    await new Promise(resolve => setTimeout(resolve, 10))
+    const extracted = await ctx.memory.list({ scope: 'project', workspaceId: 'ws-1' })
+    expect(extracted.some(record => record.text.includes('queue drains'))).toBe(true)
+    expect(extracted.find(record => record.text.includes('queue drains'))?.source.origin).toBe('extracted')
   })
 })

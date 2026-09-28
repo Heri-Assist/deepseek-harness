@@ -40,12 +40,15 @@ Mount it beside [`@deepseek-ai/dsh-memory`](../memory/README.md). It needs the m
 | `limit` | `3` | Maximum records appended in one step |
 | `maxChars` | `2000` | Maximum total characters appended in one step |
 | `refreshIntervalMs` | `0` | Minimum delay between injections in one session; `0` injects at every eligible step |
+| `workspaceId` | none | Workspace bound to `project` and `task`-scope searches; without it those scopes are not searched |
+| `extractOnCompaction` | `false` | Extract a durable fact from each committed compaction summary |
+| `extractionMaxChars` | `500` | Character budget for one extracted fact |
 
 The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-memory-context) is the exhaustive source for the accepted fields.
 
 ### When it injects
 
-A step is eligible when its incoming text still has a content term after stopwords and very short tokens are dropped, at least one saved record in an eligible scope matches one of those terms, and no record in the batch was already injected in this Session. Nothing is appended when no content term matches.
+A step is eligible when its incoming text still has a content term after stopwords and very short tokens are dropped, at least one saved record in an eligible scope matches one of those terms, and no record in the batch was already injected in this Session. Nothing is appended when no content term matches. With `extractOnCompaction`, each committed summary is also stored as one `project`-scope fact tagged `compaction-summary`, at the bound workspace or the session's working directory; a store failure never changes the compaction result.
 
 -----
 
@@ -95,10 +98,10 @@ The injected message is new visible content after the stable request prefix, so 
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- Only the `global` scope is eligible by default; binding `project` or `task` records to a Session needs a workspace identity this plugin does not yet resolve.
+- Only the `global` scope is eligible by default; searching `project` or `task` requires the configured `workspaceId`.
+- Extraction reads compaction summaries only; nothing derives facts from ordinary turns.
 - Match is exact-term FTS5 over content words; it does not rank paraphrase or semantic similarity.
 - The query is filtered by an English stopword list; other languages fall back to a length filter.
-- The plugin injects but never extracts: nothing derives new facts from the conversation.
 
 -----
 

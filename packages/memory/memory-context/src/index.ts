@@ -9,6 +9,7 @@
 
 import type { Context } from '@deepseek-ai/cordis'
 import z from '@deepseek-ai/schemastery'
+import type {} from '@deepseek-ai/dsh-compaction/types'
 import { z as zod } from 'zod'
 import type { Agent, PreStepDecision } from '@deepseek-ai/dsh-agent'
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
@@ -71,6 +72,12 @@ export interface Config {
   maxChars?: number
   /** Minimum milliseconds between injections in one session; 0 injects at every eligible step; defaults to 0. */
   refreshIntervalMs?: number
+  /** Workspace bound to `project` and `task` scopes; required to search either. */
+  workspaceId?: string
+  /** Extract durable facts from each committed compaction summary; defaults to false. */
+  extractOnCompaction?: boolean
+  /** Character budget for one extracted fact; defaults to 500. */
+  extractionMaxChars?: number
 }
 
 /** Schemastery validation for {@link Config}. */
@@ -79,6 +86,9 @@ export const Config: z<Config> = z.object({
   limit: z.number().step(1).min(1).max(20).default(3),
   maxChars: z.number().step(1).min(1).max(20_000).default(2000),
   refreshIntervalMs: z.number().step(1).min(0).max(86_400_000).default(0),
+  workspaceId: z.string().min(1),
+  extractOnCompaction: z.boolean().default(false),
+  extractionMaxChars: z.number().step(1).min(1).max(10_000).default(500),
 })
 
 /** Extract the text the request would carry, joined in order. */
@@ -140,6 +150,11 @@ export function apply(ctx: Context, config: Config): void {
   const maxChars = config.maxChars ?? 2000
   const refreshIntervalMs = config.refreshIntervalMs ?? 0
   /* v8 ignore stop */
+  const workspaceId = config.workspaceId
+  /* v8 ignore start -- schemastery fills these two defaults on every plugin load; the fallbacks serve direct construction */
+  const extractOnCompaction = config.extractOnCompaction ?? false
+  const extractionMaxChars = config.extractionMaxChars ?? 500
+  /* v8 ignore stop */
 
   ctx.sessionProjections.register({
     key: 'memoryContext',
@@ -173,7 +188,7 @@ export function apply(ctx: Context, config: Config): void {
     const seen = new Set(state.injectedIds)
     const hits: MemoryHit[] = []
     for (const scope of scopes) {
-      const found = await ctx.memory.search({ text: query, scope, limit, match: 'any' })
+      const found = await ctx.memory.search({ text: query, scope, workspaceId, limit, match: 'any' })
       for (const hit of found) if (!seen.has(hit.record.id)) hits.push(hit)
     }
     hits.sort((a, b) => a.rank - b.rank)
@@ -195,4 +210,28 @@ export function apply(ctx: Context, config: Config): void {
       ],
     }
   })
+
+  if (extractOnCompaction) {
+    // Compaction replaced a region of history; the summary it committed is the
+    // durable description of what that region held, so it is the best available
+    // source of a fact worth keeping. Extraction is best-effort: a store failure
+    // never changes the compaction result the caller already committed.
+    ctx.on('session/event', (session, event) => {
+      if (event.type !== 'compaction/summary') return
+      /* v8 ignore start -- summary text blocks and the extracted record are the only supported shapes */
+      const text = event.data.summary.flatMap(block => block.type === 'text' ? [block.text] : []).join('\n').slice(0, extractionMaxChars).trim()
+      if (text.length === 0) return
+      const workspace = workspaceId ?? session.header.cwd
+      void ctx.memory.remember({
+        text,
+        scope: 'project',
+        ...workspace === undefined ? {} : { workspaceId: workspace },
+        tags: ['compaction-summary'],
+        source: { origin: 'extracted', sessionId: session.header.id, eventSeq: event.seq },
+      }).catch((error: unknown) => {
+        ctx.logger.warn(`memory-context: extraction failed: ${String(error)}`)
+      })
+      /* v8 ignore stop */
+    }, { global: true })
+  }
 }
