@@ -58,7 +58,6 @@ function ensureSchema(db: DatabaseSync): void {
       tags TEXT NOT NULL,
       source TEXT NOT NULL,
       pinned INTEGER NOT NULL DEFAULT 0,
-      supersedes TEXT,
       deleted INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,

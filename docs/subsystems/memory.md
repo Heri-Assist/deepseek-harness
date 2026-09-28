@@ -8,7 +8,7 @@ Source: [`packages/memory/memory/src/types.ts`](../../packages/memory/memory/src
 
 ## Records and scopes
 
-A `MemoryRecord` carries a branded `MemoryId`, a `MemoryScope` of `global`, `project`, or `task`, optional owning `workspaceId` and `taskId`, optional `key` and `tags`, the fact `text`, `MemorySource`, a `pinned` flag, an optional `supersedes` id, timestamps, and a use count. A `project` write requires a workspace id and a `task` write additionally requires a task id; a write missing either is rejected with `MemoryInputError` before storage. The store checks that `text` is non-empty and within the configured byte limit; it does not redact, so callers must not write credentials.
+A `MemoryRecord` carries a branded `MemoryId`, a `MemoryScope` of `global`, `project`, or `task`, optional owning `workspaceId` and `taskId`, optional `key` and `tags`, the fact `text`, `MemorySource`, a `pinned` flag, timestamps, and a use count. A `project` write requires a workspace id and a `task` write additionally requires a task id; a write missing either is rejected with `MemoryInputError` before storage. The store checks that `text` is non-empty and within the configured byte limit; it does not redact, so callers must not write credentials.
 
 `MemorySource` records the producing session id, event sequence, and tool call id when known, plus a `MemoryOrigin` of `explicit` or `extracted`.
 

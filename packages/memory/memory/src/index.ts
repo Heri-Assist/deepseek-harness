@@ -83,7 +83,6 @@ interface MemoryRow {
   tags: string
   source: string
   pinned: number
-  supersedes: string | null
   created_at: string
   updated_at: string
   last_used_at: string | null
@@ -111,12 +110,13 @@ function resolveScope(input: RememberInput): { scope: MemoryScope; workspaceId?:
 }
 
 /**
- * Quote one query term as an inert FTS5 phrase.
+ * Quote one query term as an inert FTS5 phrase. The tokenizer admits only
+ * letters, digits, and underscores, so the term carries no quote to escape.
  * @param term - a single alphanumeric token.
  * @returns the quoted phrase.
  */
 function quoteTerm(term: string): string {
-  return `"${term.replaceAll('"', '""')}"`
+  return `"${term}"`
 }
 
 /**
@@ -178,7 +178,6 @@ function toMemoryRow(row: Record<string, SqlValue>): MemoryRow {
     tags: readRequiredString(row, 'tags'),
     source: readRequiredString(row, 'source'),
     pinned: readRequiredNumber(row, 'pinned'),
-    supersedes: readOptionalString(row, 'supersedes'),
     created_at: readRequiredString(row, 'created_at'),
     updated_at: readRequiredString(row, 'updated_at'),
     last_used_at: readOptionalString(row, 'last_used_at'),
@@ -201,7 +200,6 @@ function rowToRecord(row: MemoryRow): MemoryRecord {
     ...row.workspace_id === null ? {} : { workspaceId: row.workspace_id },
     ...row.task_id === null ? {} : { taskId: row.task_id },
     ...row.key === null ? {} : { key: row.key },
-    ...row.supersedes === null ? {} : { supersedes: toMemoryId(row.supersedes) },
     ...row.last_used_at === null ? {} : { lastUsedAt: row.last_used_at },
   }
   return record

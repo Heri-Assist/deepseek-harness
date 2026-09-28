@@ -8,7 +8,7 @@ Source: [`packages/memory/memory/src/types.ts`](../../packages/memory/memory/src
 
 ## 记录与 scope
 
-`MemoryRecord` 携带品牌化的 `MemoryId`、取值为 `global`、`project` 或 `task` 的 `MemoryScope`、可选的所属 `workspaceId` 与 `taskId`、可选的 `key` 与 `tags`、事实 `text`、`MemorySource`、`pinned` 标记、可选的 `supersedes` id、时间戳与使用计数。`project` 写入需要 workspace id，`task` 写入还额外需要 task id；缺失任一项的写入会在存储前以 `MemoryInputError` 拒绝。存储会检查 `text` 非空且处于配置的字节上限内；它不做脱敏，因此调用方不得写入凭据。
+`MemoryRecord` 携带品牌化的 `MemoryId`、取值为 `global`、`project` 或 `task` 的 `MemoryScope`、可选的所属 `workspaceId` 与 `taskId`、可选的 `key` 与 `tags`、事实 `text`、`MemorySource`、`pinned` 标记、时间戳与使用计数。`project` 写入需要 workspace id，`task` 写入还额外需要 task id；缺失任一项的写入会在存储前以 `MemoryInputError` 拒绝。存储会检查 `text` 非空且处于配置的字节上限内；它不做脱敏，因此调用方不得写入凭据。
 
 `MemorySource` 记录产生它的会话 id、事件序号与已知时的工具调用 id，以及取值为 `explicit` 或 `extracted` 的 `MemoryOrigin`。
 

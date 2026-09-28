@@ -64,8 +64,6 @@ export interface MemoryRecord {
   readonly source: MemorySource
   /** Pinned records survive scope eviction and are re-injected after compaction. */
   readonly pinned: boolean
-  /** Record this one replaces, when the write superseded an earlier fact. */
-  readonly supersedes?: MemoryId
   /** Creation instant, ISO-8601 with millisecond precision. */
   readonly createdAt: string
   /** Last mutation instant. */
