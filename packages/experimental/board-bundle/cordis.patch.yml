@@ -1,0 +1,11 @@
+# Experimental project task board over the shipped composition, which carries no
+# board rows. `board` owns durable per-workspace tasks and registers the board
+# tools; `board-executor` dispatches ready tasks to delegated runs, optionally in
+# their own git worktrees. The base composition supplies storage and a subagent
+# provider.
+
+- insert:
+    - id: board
+      name: '@deepseek-ai/dsh-board'
+    - id: board-executor
+      name: '@deepseek-ai/dsh-board-executor'

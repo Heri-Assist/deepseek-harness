@@ -1,0 +1,46 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/experimental/board-bundle/README.md
+/:
+  en: 417638cca26da529
+  zh: 945c518937779777
+/deepseek-ai-dsh-experimental-board-bundle:
+  en: 0fb6bf452138bb0c
+  zh: 1271d2a219c96051
+/deepseek-ai-dsh-experimental-board-bundle/summary:
+  en: ee38c716ae32f22d
+  zh: 0437ff686ea287bb
+/deepseek-ai-dsh-experimental-board-bundle/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 5b6bd00fce5371c3
+/deepseek-ai-dsh-experimental-board-bundle/use-this-package:
+  en: 709b45d1b4a2363b
+  zh: 85ed30690438dd15
+/deepseek-ai-dsh-experimental-board-bundle/understand-the-implementation:
+  en: eb23dcef27f46ae3
+  zh: 02d3147be70cc871
+/deepseek-ai-dsh-experimental-board-bundle/further-exploration:
+  en: 7f83bfe18d8e2dd3
+  zh: b0e4687161a94adc
+/deepseek-ai-dsh-experimental-board-bundle/model-experience:
+  en: 215e7ba838619b7b
+  zh: a311da3843709f90
+/deepseek-ai-dsh-experimental-board-bundle/model-experience/board-tools:
+  en: 70ffa9691c88d397
+  zh: 00768f55972b0a47
+/deepseek-ai-dsh-experimental-board-bundle/model-experience/board-tools/what-the-model-sees:
+  en: 0a398f2e5eeebaca
+  zh: 4b11326edd9fbd9b
+/deepseek-ai-dsh-experimental-board-bundle/model-experience/board-tools/token-effect:
+  en: 5b1a902291231a33
+  zh: bc6033232f87b546
+/deepseek-ai-dsh-experimental-board-bundle/model-experience/board-tools/kv-cache-effect:
+  en: cb1e6014cacca1a0
+  zh: 83d92acc94d049a7
+/deepseek-ai-dsh-experimental-board-bundle/known-limitations-and-deferred-work:
+  en: f587fb5a45bd35ac
+  zh: 83e02ec72e81a3a3
+/deepseek-ai-dsh-experimental-board-bundle/known-limitations-and-deferred-work/dev-note:
+  en: 0225ba087c5266f3
+  zh: 53f5adbcc7db8671
