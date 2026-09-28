@@ -618,6 +618,13 @@ const SERVICE_ROLES: ServiceRole[] = [
     note: 'Owns one FTS5 store under $DSH_HOME and registers the remember, recall, and forget tools.',
   },
   {
+    key: 'board',
+    pkg: 'board',
+    title: 'Project-scoped task board',
+    mode: 'core',
+    note: 'Owns durable per-workspace tasks, derives readiness from dependency edges, and registers the board tools.',
+  },
+  {
     key: 'goals',
     pkg: 'goal',
     title: 'Same-session goal domain',

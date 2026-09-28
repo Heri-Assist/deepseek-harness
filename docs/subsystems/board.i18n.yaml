@@ -1,0 +1,10 @@
+# Bilingual-pair consistency record for board.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write docs/subsystems/board.md
+/project-task-board:
+  en: 518719404705a2d2
+  zh: f6b886f0b8dae0bd
+/project-task-board/tasks-and-status:
+  en: e2cfd67b0321353a
+  zh: 01a40b9f6b5b2368

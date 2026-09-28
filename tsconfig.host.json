@@ -328,6 +328,7 @@
     { "path": "./packages/goal/command-goal" },
     { "path": "./packages/feedback/command-feedback" },
     { "path": "./packages/schedule/schedule" },
+    { "path": "./packages/board/board" },
     { "path": "./packages/memory/memory" },
     { "path": "./packages/memory/memory-context" },
     { "path": "./packages/context/time-context" },

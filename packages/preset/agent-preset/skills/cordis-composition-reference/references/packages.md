@@ -30,6 +30,12 @@ Every package below exports a Cordis plugin that a bundle patch can name in a Lo
 |---|---|---|
 | `@deepseek-ai/dsh-attachment-local` | yes | Private content-addressed DSH_HOME attachment storage |
 
+## board
+
+| Package | Config | Description |
+|---|---|---|
+| `@deepseek-ai/dsh-board` | yes | Project-scoped agent task board with dependency-ready selection |
+
 ## boot
 
 | Package | Config | Description |

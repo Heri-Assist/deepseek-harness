@@ -429,6 +429,23 @@ export type Config = LocalConfig
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-bash-sandbox -->
 
+<!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-board -->
+<a id="deepseek-aidsh-board"></a>
+
+## `@deepseek-ai/dsh-board`
+
+- `inject`: `storageDomain` · `tools`
+- `source`: [`packages/board/board/src/index.ts:52`](../packages/board/board/src/index.ts)
+
+```ts config-catalog
+/** Board configuration. */
+export interface Config {
+  /** Maximum tasks retained per workspace; defaults to 256. */
+  maxTasksPerWorkspace?: number
+}
+```
+<!-- END GENERATED config-catalog:@deepseek-ai/dsh-board -->
+
 <!-- BEGIN GENERATED config-catalog:@deepseek-ai/dsh-client-connection -->
 <a id="deepseek-aidsh-client-connection"></a>
 

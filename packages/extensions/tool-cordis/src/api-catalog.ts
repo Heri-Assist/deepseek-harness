@@ -543,6 +543,55 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'board',
+    summary: 'Durable, workspace-scoped task board.',
+    description: 'Durable, workspace-scoped task board. Mutations are serialized so a compare-and-set never races another write in this process.',
+    methods: [
+      {
+        signature: 'create(input: BoardCreateInput): Promise<BoardTask>',
+        description: 'Create one task.',
+        parameters: [{ name: 'input', description: 'board, title, and optional fields.' }],
+        returns: 'the stored task.',
+      },
+      {
+        signature: 'get(id: BoardTaskId): Promise<BoardTask>',
+        description: 'Read one task.',
+        parameters: [{ name: 'id', description: 'task identity.' }],
+        returns: 'the stored task.',
+      },
+      {
+        signature: 'async list(query: BoardListQuery): Promise<BoardTask[]>',
+        description: 'List a board\'s tasks, newest last.',
+        parameters: [{ name: 'query', description: 'board and optional filters.' }],
+        returns: 'the matching tasks.',
+      },
+      {
+        signature: 'update(input: BoardUpdateInput): Promise<BoardTask>',
+        description: 'Replace the listed fields of one task under compare-and-set.',
+        parameters: [{ name: 'input', description: 'task, expected revision, and replacement fields.' }],
+        returns: 'the updated task.',
+      },
+      {
+        signature: 'claim(id: BoardTaskId, revision: number, assignee: BoardAssignee): Promise<BoardTask>',
+        description: 'Move one ready-to-start task to `in_progress` and assign it.',
+        parameters: [{ name: 'id', description: 'task identity.' }, { name: 'revision', description: 'expected current revision.' }, { name: 'assignee', description: 'who takes the task.' }],
+        returns: 'the updated task.',
+      },
+      {
+        signature: 'complete(id: BoardTaskId, revision: number): Promise<BoardTask>',
+        description: 'Mark one task `done` under compare-and-set.',
+        parameters: [{ name: 'id', description: 'task identity.' }, { name: 'revision', description: 'expected current revision.' }],
+        returns: 'the updated task.',
+      },
+      {
+        signature: 'cancel(id: BoardTaskId, revision: number): Promise<BoardTask>',
+        description: 'Cancel one task under compare-and-set.',
+        parameters: [{ name: 'id', description: 'task identity.' }, { name: 'revision', description: 'expected current revision.' }],
+        returns: 'the updated task.',
+      },
+    ],
+  },
+  {
     key: 'browserUse',
     summary: 'Owns one optional provider registration in the shared browser-use service.',
     description: 'Owns one optional provider registration in the shared browser-use service.',
@@ -3946,6 +3995,14 @@ export const EVENT_API: readonly EventApiEntry[] = [
     parameters: [{ name: 'key', description: 'the credential record the finished attempt was authorizing.' }, { name: 'settlement', description: 'how it ended, including the `failed` case its caller sees as a thrown error.' }],
   },
   {
+    name: 'board/changed',
+    mode: 'emit',
+    signature: '\'board/changed\'(): void',
+    summary: 'A board task was created, changed, or cancelled; clients refetch.',
+    description: 'A board task was created, changed, or cancelled; clients refetch.',
+    parameters: [],
+  },
+  {
     name: 'commands/change',
     mode: 'emit',
     signature: '\'commands/change\'(): void',
@@ -4712,6 +4769,38 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'BashEnvVariableInfo',
     declaration: 'export interface BashEnvVariableInfo extends BashEnvVariable {\n    contributor: string;\n    key: DshEnvironmentKey;\n}',
+  },
+  {
+    name: 'BoardAssignee',
+    declaration: 'export interface BoardAssignee {\n    readonly kind: \'human\' | \'agent\';\n    readonly sessionId?: SessionId | undefined;\n    readonly label?: string | undefined;\n}',
+  },
+  {
+    name: 'BoardCreateInput',
+    declaration: 'export interface BoardCreateInput {\n    readonly workspaceId: WorkspaceId;\n    readonly title: string;\n    readonly description?: string;\n    readonly priority?: BoardPriority;\n    readonly labels?: readonly string[];\n    readonly blockedBy?: readonly BoardTaskId[];\n    readonly writeScopes?: readonly string[];\n}',
+  },
+  {
+    name: 'BoardListQuery',
+    declaration: 'export interface BoardListQuery {\n    readonly workspaceId: WorkspaceId;\n    readonly status?: BoardTaskStatus;\n    readonly readyOnly?: boolean;\n}',
+  },
+  {
+    name: 'BoardPriority',
+    declaration: 'export type BoardPriority = \'low\' | \'normal\' | \'high\';',
+  },
+  {
+    name: 'BoardTask',
+    declaration: 'export interface BoardTask {\n    readonly id: BoardTaskId;\n    readonly workspaceId: WorkspaceId;\n    readonly revision: number;\n    readonly title: string;\n    readonly description?: string | undefined;\n    readonly priority: BoardPriority;\n    readonly labels: readonly string[];\n    readonly status: BoardTaskStatus;\n    readonly blockedBy: readonly BoardTaskId[];\n    readonly writeScopes: readonly string[];\n    readonly assignee?: BoardAssignee | undefined;\n    readonly createdAt: string;\n    readonly updatedAt: string;\n}',
+  },
+  {
+    name: 'BoardTaskId',
+    declaration: 'export type BoardTaskId = Branded<\'BoardTaskId\'>;',
+  },
+  {
+    name: 'BoardTaskStatus',
+    declaration: 'export type BoardTaskStatus = \'backlog\' | \'in_progress\' | \'review\' | \'done\' | \'cancelled\' | \'blocked\';',
+  },
+  {
+    name: 'BoardUpdateInput',
+    declaration: 'export interface BoardUpdateInput {\n    readonly id: BoardTaskId;\n    readonly revision: number;\n    readonly title?: string;\n    readonly description?: string;\n    readonly priority?: BoardPriority;\n    readonly labels?: readonly string[];\n    readonly status?: BoardTaskStatus;\n    readonly blockedBy?: readonly BoardTaskId[];\n    readonly writeScopes?: readonly string[];\n    readonly assignee?: BoardAssignee;\n}',
   },
   {
     name: 'Branded',
