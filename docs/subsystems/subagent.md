@@ -37,7 +37,7 @@ interface SubagentCapabilities {
 
 ## The one-shot start request
 
-The tool layer builds this request from the model input and its own config; the service validates it against the named provider before `start`. Required `parent` supplies the session cwd, lineage, and delegation depth. Optional Agent provider, model, reasoning-effort, and token overrides, output schema, depth, tool filter, and persona require matching capability flags. In-process backends merge `agentOptions` over the parent Agent's options, scope filters and personas to child creation, and implement the supported object-rooted schema with a forced capture tool. The DSH SDK backend merges the four Agent route fields over its instance defaults and validates them in the child runtime's initialization; ACP, Codex, and Claude Code reject `agentOptions` before starting their transports.
+The tool layer builds this request from the model input and its own config; the service validates it against the named provider before `start`. Required `parent` supplies the session cwd, lineage, and delegation depth; an optional `cwd` replaces that working directory for the child, so a caller can isolate a delegated run in its own checkout. Optional Agent provider, model, reasoning-effort, and token overrides, output schema, depth, tool filter, and persona require matching capability flags. In-process backends merge `agentOptions` over the parent Agent's options, scope filters and personas to child creation, and implement the supported object-rooted schema with a forced capture tool. The DSH SDK backend merges the four Agent route fields over its instance defaults and validates them in the child runtime's initialization; ACP, Codex, and Claude Code reject `agentOptions` before starting their transports.
 
 ```ts type-equiv
 /**
@@ -58,6 +58,14 @@ interface SubagentStartRequest {
    * and only when no deployment `cwd` override is configured.
    */
   readonly parent: Agent
+  /**
+   * Optional absolute working directory for the child, validated at start as an
+   * enterable absolute directory. In-process providers record it on the child
+   * session in place of the parent's cwd; out-of-process providers use it ahead
+   * of the parent session cwd. Omission inherits the parent session cwd. This is
+   * how a caller isolates a delegated run from the parent's checkout.
+   */
+  readonly cwd?: string
   /**
    * Cancellation signal from the spawning context (the tool's `exec.signal`).
    * This is the canonical cancellation channel both before and after startup:

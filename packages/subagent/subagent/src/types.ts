@@ -154,6 +154,14 @@ export interface SubagentStartRequest {
    */
   readonly parent: Agent
   /**
+   * Optional absolute working directory for the child, validated at start as an
+   * enterable absolute directory. In-process providers record it on the child
+   * session in place of the parent's cwd; out-of-process providers use it ahead
+   * of the parent session cwd. Omission inherits the parent session cwd. This is
+   * how a caller isolates a delegated run from the parent's checkout.
+   */
+  readonly cwd?: string
+  /**
    * Cancellation signal from the spawning context (the tool's `exec.signal`).
    * This is the canonical cancellation channel both before and after startup:
    * a provider rejects `start()` after cleaning partial resources when it

@@ -94,6 +94,11 @@ describe('child cwd resolution', () => {
     expect(() => resolveChildCwd('p', undefined, undefined)).toThrow('no working directory for the child')
     expect(() => resolveChildCwd('p', undefined, 'relative/parent')).toThrow('parent session cwd must be an absolute path')
   })
+
+  it('resolveChildCwd: the request cwd wins over the deployment override and is validated', () => {
+    expect(resolveChildCwd('p', tmpdir(), undefined, process.cwd())).toBe(process.cwd())
+    expect(() => resolveChildCwd('p', undefined, tmpdir(), 'relative/request')).toThrow('request cwd must be an absolute path')
+  })
 })
 
 describe('settleRunResult', () => {

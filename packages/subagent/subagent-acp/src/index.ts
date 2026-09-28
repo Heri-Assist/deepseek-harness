@@ -122,14 +122,16 @@ function assertUsableCwd(label: string, cwd: string): string {
 }
 
 /**
- * Resolve the child's working directory: the deployment `cwd` override when
- * configured (already validated at load), else the parent session's workspace
- * cwd (validated here, its earliest resolvable point). Fails loud when neither
- * exists — falling back to the harness process cwd would silently bind the
- * child to the server's launch directory instead of the delegating session's
- * workspace (one server process serves many sessions, each with its own cwd).
+ * Resolve the child's working directory: the request's own `cwd` when supplied,
+ * else the deployment `cwd` override when configured (already validated at
+ * load), else the parent session's workspace cwd (validated here, its earliest
+ * resolvable point). Fails loud when none exists — falling back to the harness
+ * process cwd would silently bind the child to the server's launch directory
+ * instead of the delegating session's workspace (one server process serves many
+ * sessions, each with its own cwd).
  */
 function resolveCwd(configured: string | undefined, request: SubagentStartRequest): string {
+  if (request.cwd !== undefined) return assertUsableCwd('request cwd', request.cwd)
   if (configured !== undefined) return configured
   const parentCwd = request.parent.session.header.cwd
   if (parentCwd === undefined) {

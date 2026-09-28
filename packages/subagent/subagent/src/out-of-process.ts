@@ -132,19 +132,23 @@ export function validateConfiguredCwd(prefix: string, cwd: string | undefined): 
 }
 
 /**
- * Resolve the child's working directory at start: the deployment override
- * when configured (already validated at load), else the parent session's
- * workspace cwd (validated here, its earliest resolvable point). Fails loud
- * when neither exists — falling back to the harness process cwd would
- * silently bind the child to the server's launch directory instead of the
- * delegating session's workspace (one server process serves many sessions,
- * each with its own cwd).
+ * Resolve the child's working directory at start: the request's own `cwd` when
+ * supplied, else the deployment override when configured (already validated at
+ * load), else the parent session's workspace cwd (validated here, its earliest
+ * resolvable point). Fails loud when none exists — falling back to the harness
+ * process cwd would silently bind the child to the server's launch directory
+ * instead of the delegating session's workspace (one server process serves many
+ * sessions, each with its own cwd).
  * @param prefix - the consuming plugin's diagnostic prefix.
  * @param configured - the load-validated override, or `undefined`.
  * @param parentCwd - the delegating parent session's workspace cwd, if any.
+ * @param requested - the per-child absolute directory from the start request, if any.
  * @returns the absolute child working directory.
  */
-export function resolveChildCwd(prefix: string, configured: string | undefined, parentCwd: string | undefined): string {
+export function resolveChildCwd(
+  prefix: string, configured: string | undefined, parentCwd: string | undefined, requested?: string,
+): string {
+  if (requested !== undefined) return assertUsableCwd(prefix, 'request cwd', requested)
   if (configured !== undefined) return configured
   if (parentCwd === undefined) {
     throw new Error(`${prefix}: no working directory for the child — configure \`cwd\` or delegate from a parent session that has one`)
