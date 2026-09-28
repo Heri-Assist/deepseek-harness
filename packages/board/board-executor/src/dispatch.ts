@@ -81,15 +81,22 @@ export async function runDispatch(ports: DispatchPorts, options: DispatchOptions
     }
     await ports.claim(task.id, task.revision, { kind: 'agent', sessionId: parent.session.header.id })
     const prompt = task.description === undefined ? task.title : `${task.title}\n\n${task.description}`
-    const run = await ports.start(options.provider, {
-      label: task.title,
-      prompt: [{ type: 'text', text: prompt }],
-      parent,
-      signal: options.signal,
-      ...cwd === undefined ? {} : { cwd },
-    })
-    started.push(task.id)
-    void settle(ports, task.id, run)
+    try {
+      const run = await ports.start(options.provider, {
+        label: task.title,
+        prompt: [{ type: 'text', text: prompt }],
+        parent,
+        signal: options.signal,
+        ...cwd === undefined ? {} : { cwd },
+      })
+      started.push(task.id)
+      void settle(ports, task.id, run)
+    } catch {
+      // A start failure has no run to settle: release the claimed task as blocked.
+      const current = await ports.get(task.id)
+      await ports.update({ id: task.id, revision: current.revision, status: 'blocked' })
+      skipped.push(task.id)
+    }
   }
   return { started, skipped }
 }

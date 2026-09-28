@@ -121,6 +121,36 @@ describe('runDispatch', () => {
     await tick()
     expect(record.starts[0]?.cwd).toBe('/worktrees/a')
   })
+
+  it('starts a creator-less task with a supplied parent and folds its description into the prompt', async () => {
+    const tasks = [task('a', { description: 'extra detail' })]
+    const record = recorder(tasks, () => undefined)
+    const outcome = await runDispatch(record.ports, {
+      workspaceId: 'ws-1', provider: 'test', maxConcurrent: 1, useWorktrees: false,
+      parent: agent('parent'), signal: new AbortController().signal,
+    })
+    expect(outcome).toEqual({ started: [String(tasks[0]?.id)], skipped: [] })
+    const prompt = record.starts[0]?.prompt.flatMap(block => block.type === 'text' ? [block.text] : []).join('')
+    expect(prompt).toContain('extra detail')
+  })
+
+  it('omits cwd when worktrees are enabled but no repository path is known, and skips a parentless task', async () => {
+    const tasks = [task('a')]
+    const record = recorder(tasks, () => agent('parent'))
+    await runDispatch(record.ports, {
+      workspaceId: 'ws-1', provider: 'test', maxConcurrent: 1, useWorktrees: true,
+      parent: agent('parent'), signal: new AbortController().signal,
+      createWorktree: () => Promise.resolve({ path: '/worktrees/a' }),
+    })
+    expect(record.starts[0]?.cwd).toBeUndefined()
+
+    const orphan = recorder([task('b')], () => undefined)
+    const outcome = await runDispatch(orphan.ports, {
+      workspaceId: 'ws-1', provider: 'test', maxConcurrent: 1, useWorktrees: false,
+      signal: new AbortController().signal,
+    })
+    expect(outcome).toEqual({ started: [], skipped: [String(BoardTaskId('b'))] })
+  })
 })
 
 describe('runAuto', () => {
@@ -147,5 +177,16 @@ describe('runAuto', () => {
     await tick()
     expect(outcome.started).toEqual([String(tasks[0]?.id)])
     expect(record.starts).toHaveLength(1)
+  })
+
+  it('skips every workspace when no path resolver is configured', async () => {
+    const tasks = [task('a')]
+    const record = recorder(tasks, () => agent('parent'))
+    const outcome = await runAuto(record.ports, {
+      provider: 'test', maxConcurrent: 1, useWorktrees: true,
+      parent: agent('parent'), signal: new AbortController().signal,
+    })
+    expect(outcome).toEqual({ started: [], skipped: [] })
+    expect(record.starts).toHaveLength(0)
   })
 })

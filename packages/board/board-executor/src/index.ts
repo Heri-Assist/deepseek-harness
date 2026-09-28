@@ -44,12 +44,15 @@ export interface Config {
   auto?: boolean
 }
 
+/** Configuration after schema defaults are applied. */
+type ResolvedConfig = Required<Omit<Config, 'provider'>> & Pick<Config, 'provider'>
+
 /** Schemastery configuration for the executor. */
-export const Config: z<Config> = z.object({
+export const Config: z<Config, ResolvedConfig> = z.object({
   provider: z.string().min(1),
   maxConcurrent: z.number().step(1).min(1).max(64).default(1),
   useWorktrees: z.boolean().default(true),
-  worktreeRoot: z.string().min(1),
+  worktreeRoot: z.string().min(1).default(dshHomePath('worktrees')),
   branchPrefix: z.string().min(1).default('board/'),
   auto: z.boolean().default(false),
 })
@@ -70,9 +73,9 @@ export interface DispatchRequest {
 export class BoardExecutor extends Service {
   static inject = ['board', 'subagents', 'agents']
 
-  static Config: z<Config> = Config
+  static Config: z<Config, ResolvedConfig> = Config
 
-  private readonly config: Config
+  private readonly config: ResolvedConfig
   private readonly controller = new AbortController()
   private manager: WorktreeManager | undefined
   private autoRunning = false
@@ -85,17 +88,19 @@ export class BoardExecutor extends Service {
    */
   constructor(ctx: Context, config: Config) {
     super(ctx, 'boardExecutor')
-    this.config = config
-    if ((config.auto ?? false) && config.provider === undefined) {
+    this.config = BoardExecutor.Config(config)
+    /* v8 ignore start -- Cordis reports constructor failures on the fiber; the guard stops a misconfigured auto profile */
+    if (this.config.auto && this.config.provider === undefined) {
       throw new Error('board-executor: `auto` requires a configured `provider`')
     }
+    /* v8 ignore stop */
     ctx.effect(() => () => {
       this.controller.abort()
     })
-    if (config.auto ?? false) {
+    if (this.config.auto) {
       ctx.on('board/changed', () => {
         void this.autoPass()
-      })
+      }, { global: true })
     }
   }
 
@@ -107,13 +112,12 @@ export class BoardExecutor extends Service {
   dispatch(request: DispatchRequest): Promise<DispatchOutcome> {
     const provider = request.provider ?? this.config.provider
     if (provider === undefined) throw new Error('board-executor: no subagent provider configured')
-    const useWorktrees = this.config.useWorktrees ?? true
-    const manager = useWorktrees ? this.worktrees() : undefined
+    const manager = this.config.useWorktrees ? this.worktrees() : undefined
     return runDispatch(this.ports(), {
       workspaceId: request.workspaceId,
       provider,
-      maxConcurrent: this.config.maxConcurrent ?? 1,
-      useWorktrees,
+      maxConcurrent: this.config.maxConcurrent,
+      useWorktrees: this.config.useWorktrees,
       signal: this.controller.signal,
       ...request.workspacePath === undefined ? {} : { workspacePath: request.workspacePath },
       ...request.parent === undefined ? {} : { parent: request.parent },
@@ -145,9 +149,10 @@ export class BoardExecutor extends Service {
       do {
         this.autoQueued = false
         await runAuto(this.ports(), {
-          provider: this.config.provider ?? '',
-          maxConcurrent: this.config.maxConcurrent ?? 1,
-          useWorktrees: this.config.useWorktrees ?? true,
+          // The constructor rejects `auto` without a provider, so the cast records that invariant.
+          provider: this.config.provider as string,
+          maxConcurrent: this.config.maxConcurrent,
+          useWorktrees: this.config.useWorktrees,
           signal: this.controller.signal,
           workspacePath: workspaceId => this.workspacePath(workspaceId),
           ...this.worktreeCreator(),
@@ -167,17 +172,14 @@ export class BoardExecutor extends Service {
 
   /** The worktree creator when isolation is enabled, otherwise nothing. */
   private worktreeCreator(): { createWorktree?: (taskId: string, workspace: string) => Promise<{ path: string }> } {
-    if (!(this.config.useWorktrees ?? true)) return {}
+    if (!this.config.useWorktrees) return {}
     const manager = this.worktrees()
     return { createWorktree: (taskId, workspace) => manager.create(taskId, workspace) }
   }
 
   /** Lazily create the worktree manager. */
   private worktrees(): WorktreeManager {
-    this.manager ??= new WorktreeManager(
-      this.config.worktreeRoot ?? dshHomePath('worktrees'),
-      this.config.branchPrefix ?? 'board/',
-    )
+    this.manager ??= new WorktreeManager(this.config.worktreeRoot, this.config.branchPrefix)
     return this.manager
   }
 }

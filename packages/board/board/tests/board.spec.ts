@@ -4,14 +4,15 @@ import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
 import ToolRuntime from '@deepseek-ai/dsh-tools'
 import Storage from '@deepseek-ai/dsh-storage'
 import { DomainFacility } from '@deepseek-ai/dsh-storage-domain'
+import { SessionId } from '@deepseek-ai/dsh-session'
 import { WorkspaceId } from '@deepseek-ai/dsh-workspace'
 import { describe, expect, it } from 'vitest'
-import BoardService, { BoardConflictError, BoardInputError } from '../src/index.ts'
+import BoardService, { BoardConflictError, BoardInputError, BoardTaskId } from '../src/index.ts'
 import { MemoryMediaPool, MemoryStorageBackend } from '../../../storage/storage-domain/tests/helpers/memory-backend.ts'
 
 const WS = WorkspaceId('ws-1')
 
-async function harness(): Promise<Context> {
+async function harness(config: Record<string, unknown> = {}): Promise<Context> {
   const ctx = new Context()
   await ctx.plugin(SystemPrompt, {})
   await ctx.plugin(ToolRuntime)
@@ -24,7 +25,7 @@ async function harness(): Promise<Context> {
     ctx.provide('storageDomain', facility)
     return () => { unmount() }
   })
-  await ctx.plugin(BoardService, {})
+  await ctx.plugin(BoardService, config)
   return ctx
 }
 
@@ -69,5 +70,69 @@ describe('BoardService', () => {
     expect(claimed.status).toBe('in_progress')
     const done = await ctx.board.complete(claimed.id, claimed.revision)
     expect(done.status).toBe('done')
+  })
+
+  it('rejects a missing blocker, a self-block, an empty title, and an unknown status', async () => {
+    const ctx = await harness()
+    await expect(ctx.board.create({ workspaceId: WS, title: 'x', blockedBy: [BoardTaskId('ghost')] })).rejects.toBeInstanceOf(BoardInputError)
+    const task = await ctx.board.create({ workspaceId: WS, title: 'A' })
+    await expect(ctx.board.update({ id: task.id, revision: task.revision, blockedBy: [task.id] })).rejects.toBeInstanceOf(BoardInputError)
+    await expect(ctx.board.update({ id: task.id, revision: task.revision, title: '   ' })).rejects.toBeInstanceOf(BoardInputError)
+    await expect(ctx.board.update({ id: task.id, revision: task.revision, status: 'bogus' as never })).rejects.toBeInstanceOf(BoardInputError)
+  })
+
+  it('rejects a claim of a non-backlog task and enforces the per-workspace cap', async () => {
+    const ctx = await harness({ maxTasksPerWorkspace: 1 })
+    const task = await ctx.board.create({ workspaceId: WS, title: 'Only' })
+    await expect(ctx.board.create({ workspaceId: WS, title: 'Too many' })).rejects.toBeInstanceOf(BoardInputError)
+    const claimed = await ctx.board.claim(task.id, task.revision, { kind: 'human' })
+    await expect(ctx.board.claim(claimed.id, claimed.revision, { kind: 'human' })).rejects.toBeInstanceOf(BoardInputError)
+  })
+
+  it('lists by status, replaces every optional field, and reports its workspaces', async () => {
+    const ctx = await harness()
+    const other = WorkspaceId('ws-2')
+    const task = await ctx.board.create({ workspaceId: WS, title: 'Base' })
+    await ctx.board.create({ workspaceId: other, title: 'Elsewhere' })
+    await ctx.board.update({
+      id: task.id,
+      revision: task.revision,
+      description: 'now detailed',
+      priority: 'high',
+      labels: ['x'],
+      writeScopes: ['src/x.ts'],
+    })
+    const backlog = await ctx.board.list({ workspaceId: WS, status: 'backlog' })
+    expect(backlog.map(item => item.description)).toEqual(['now detailed'])
+    expect((await ctx.board.list({ workspaceId: WS, readyOnly: true })).length).toBe(1)
+    expect((await ctx.board.workspaces()).map(String).sort()).toEqual(['ws-1', 'ws-2'])
+  })
+
+  it('rejects an empty title, records the creating session, cancels, and closes its domain on dispose', async () => {
+    const ctx = await harness()
+    await expect(ctx.board.create({ workspaceId: WS, title: '   ' })).rejects.toBeInstanceOf(BoardInputError)
+    const created = await ctx.board.create({ workspaceId: WS, title: 'Owned', createdBy: SessionId('owner') })
+    expect(created.createdBy).toBe('owner')
+    const cancelled = await ctx.board.cancel(created.id, created.revision)
+    expect(cancelled.status).toBe('cancelled')
+
+    const stale = await ctx.board.create({ workspaceId: WS, title: 'Claim stale' })
+    await expect(ctx.board.claim(stale.id, stale.revision + 1, { kind: 'human' })).rejects.toBeInstanceOf(BoardConflictError)
+
+    await ctx.fiber.dispose()
+  })
+
+  it('detects a cycle through a shared dependency and keeps a committed write when a listener throws', async () => {
+    const ctx = await harness()
+    const a = await ctx.board.create({ workspaceId: WS, title: 'A' })
+    const b = await ctx.board.create({ workspaceId: WS, title: 'B', blockedBy: [a.id] })
+    const c = await ctx.board.create({ workspaceId: WS, title: 'C', blockedBy: [a.id] })
+    // A diamond reaches A twice, exercising the already-visited short circuit.
+    await ctx.board.create({ workspaceId: WS, title: 'D', blockedBy: [b.id, c.id] })
+    await expect(ctx.board.update({ id: a.id, revision: a.revision, blockedBy: [b.id] })).rejects.toBeInstanceOf(BoardInputError)
+
+    ctx.on('board/changed', () => { throw new Error('listener boom') })
+    const task = await ctx.board.create({ workspaceId: WS, title: 'Resilient' })
+    expect(await ctx.board.get(task.id)).toEqual(task)
   })
 })

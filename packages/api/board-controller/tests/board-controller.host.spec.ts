@@ -65,4 +65,73 @@ describe('the board Remote namespace', () => {
     }
     expect(remoteErrorOf(failure)?.code).toBe('gateway/bad-request')
   })
+
+  it('round-trips every optional field and derives readiness', async () => {
+    const ctx = await boot()
+    const blocked = await ctx.boardController.create({ workspaceId: 'ws-1', title: 'Blocker' })
+    const created = await ctx.boardController.create({
+      workspaceId: 'ws-1',
+      title: 'Detailed',
+      description: 'detail',
+      priority: 'high',
+      labels: ['a'],
+      blockedBy: [blocked.id],
+      writeScopes: ['src/a.ts'],
+    })
+    expect(created.description).toBe('detail')
+    expect(created.ready).toBe(false)
+
+    const updated = await ctx.boardController.update({
+      id: created.id,
+      revision: created.revision,
+      title: 'Detailed v2',
+      description: 'more',
+      priority: 'low',
+      labels: ['b'],
+      status: 'blocked',
+      blockedBy: [],
+      writeScopes: ['src/b.ts'],
+    })
+    expect(updated.status).toBe('blocked')
+    expect(updated.ready).toBe(false)
+    const ready = await ctx.boardController.create({ workspaceId: 'ws-1', title: 'Ready now' })
+    expect(ready.ready).toBe(true)
+
+    const minimal = await ctx.boardController.update({ id: ready.id, revision: ready.revision, title: 'Minimal edit' })
+    expect(minimal.title).toBe('Minimal edit')
+  })
+
+  it('surfaces an unknown blocker as a bad-request Remote failure', async () => {
+    const ctx = await boot()
+    let failure: unknown
+    try {
+      await ctx.boardController.create({ workspaceId: 'ws-1', title: 'Bad', blockedBy: ['ghost'] })
+    } catch (error: unknown) {
+      failure = error
+    }
+    expect(remoteErrorOf(failure)?.code).toBe('gateway/bad-request')
+  })
+
+  it('maps an unexpected service fault to gateway/internal', async () => {
+    const ctx = await boot()
+    const board: { list: BoardService['list'] } = ctx.board
+    board.list = () => { throw new Error('boom') }
+    let failure: unknown
+    try {
+      await ctx.boardController.list({ workspaceId: 'ws-1' })
+    } catch (error: unknown) {
+      failure = error
+    }
+    expect(remoteErrorOf(failure)?.code).toBe('gateway/internal')
+
+    const literal: { list: BoardService['list'] } = ctx.board
+    literal.list = () => { throw 'boom' }
+    let raw: unknown
+    try {
+      await ctx.boardController.list({ workspaceId: 'ws-1' })
+    } catch (error: unknown) {
+      raw = error
+    }
+    expect(remoteErrorOf(raw)?.message).toBe('boom')
+  })
 })
