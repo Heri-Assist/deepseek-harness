@@ -1,0 +1,46 @@
+# Bilingual-pair consistency record for 2026-09-28-layered-agent-memory.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-28-layered-agent-memory.md
+/agent-note-layered-agent-memory:
+  en: f50b38fa0ad8b943
+  zh: 7f354fa01584b797
+/agent-note-layered-agent-memory/problem:
+  en: 16ea2a3270df4482
+  zh: ce788d3df07417b2
+/agent-note-layered-agent-memory/decision:
+  en: 4747ebe2671c48e0
+  zh: 856b9e4c6d99d569
+/agent-note-layered-agent-memory/decision/memory-model:
+  en: a229c8a82c4733fe
+  zh: 7e50dcab143b8ccc
+/agent-note-layered-agent-memory/decision/scopes-and-lifecycle:
+  en: 6a87bdca03a5b962
+  zh: dbf89283a35d52ef
+/agent-note-layered-agent-memory/decision/retrieval-and-injection:
+  en: 03d8fcefd8ae5629
+  zh: da1fd7679ba075ca
+/agent-note-layered-agent-memory/decision/context-efficiency:
+  en: c59a0ea0e713dd45
+  zh: c834177804c1865d
+/agent-note-layered-agent-memory/alternatives-considered:
+  en: 6119e2aff3b6be5a
+  zh: 6119e2aff3b6be5a
+/agent-note-layered-agent-memory/alternatives-considered/why-not-ship-only-the-external-mcp-memory-servers:
+  en: aa6c330392fcfbbb
+  zh: af702269d6d9ad03
+/agent-note-layered-agent-memory/alternatives-considered/why-not-embeddings-and-a-vector-store:
+  en: de80efc62d6ecc33
+  zh: f5e66c9a31508ee3
+/agent-note-layered-agent-memory/alternatives-considered/why-not-store-only-compaction-summaries:
+  en: b5f99d437052a3df
+  zh: e56951923d432443
+/agent-note-layered-agent-memory/alternatives-considered/why-not-declare-memory-events-in-the-session-log:
+  en: 19dac706363a0468
+  zh: 1f0a03ee2db000b4
+/agent-note-layered-agent-memory/alternatives-considered/why-not-separate-definition-store-and-tool-packages:
+  en: 3bdf328b5b64e4b6
+  zh: 81f8945802677f30
+/agent-note-layered-agent-memory/consequences:
+  en: 7aec798a7cc3e551
+  zh: 7a290244f659800d

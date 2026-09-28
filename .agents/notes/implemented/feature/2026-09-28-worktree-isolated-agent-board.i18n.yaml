@@ -1,0 +1,46 @@
+# Bilingual-pair consistency record for 2026-09-28-worktree-isolated-agent-board.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write .agents/notes/implemented/feature/2026-09-28-worktree-isolated-agent-board.md
+/agent-note-worktree-isolated-agent-board:
+  en: a3a509c98027dde1
+  zh: dbea3f40e1fa7316
+/agent-note-worktree-isolated-agent-board/problem:
+  en: b8bcdab3c24ff210
+  zh: efc727ba6be56256
+/agent-note-worktree-isolated-agent-board/decision:
+  en: 1da29907c586672d
+  zh: 3adaa1c4fedba256
+/agent-note-worktree-isolated-agent-board/decision/task-model:
+  en: 25a8b1475da98c78
+  zh: 03a0b2c39ebb5bd1
+/agent-note-worktree-isolated-agent-board/decision/dispatch-and-isolation:
+  en: 82edabccce91bb4d
+  zh: 56f1d87eb956b9cb
+/agent-note-worktree-isolated-agent-board/decision/subagent-working-directory-field:
+  en: 65be16f0dd3d2b0f
+  zh: d04e062673eff9fd
+/agent-note-worktree-isolated-agent-board/decision/composition:
+  en: 01110c150a060ab5
+  zh: f1feac6f38a55b3a
+/agent-note-worktree-isolated-agent-board/alternatives-considered:
+  en: 6119e2aff3b6be5a
+  zh: 6119e2aff3b6be5a
+/agent-note-worktree-isolated-agent-board/alternatives-considered/why-not-extend-the-agent-teams-board:
+  en: 516acf5031ec8ebc
+  zh: 54ed87973c2015b8
+/agent-note-worktree-isolated-agent-board/alternatives-considered/why-not-one-board-per-session:
+  en: 92e16e6066b2d018
+  zh: e10d7298a871e0a8
+/agent-note-worktree-isolated-agent-board/alternatives-considered/why-not-a-shared-checkout-with-serialized-dispatch:
+  en: 9da2e97ac2021cdf
+  zh: 4e58e963f70feef8
+/agent-note-worktree-isolated-agent-board/alternatives-considered/why-not-auto-merge-on-completion:
+  en: e8a7ea21b0a59eb3
+  zh: 6af4eaf830478500
+/agent-note-worktree-isolated-agent-board/alternatives-considered/why-not-create-child-sessions-directly-instead-of-extending-the-subagent-request:
+  en: f30fabf6efbc2e49
+  zh: 16b353c9cc15a1ce
+/agent-note-worktree-isolated-agent-board/consequences:
+  en: 07ec508ed22b4e87
+  zh: 72d7f667109d7f18
