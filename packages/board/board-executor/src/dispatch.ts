@@ -16,6 +16,8 @@ import { planDispatch } from './plan.ts'
 export interface DispatchPorts {
   /** Read one board's tasks. */
   list(workspaceId: string): Promise<BoardTask[]>
+  /** List every workspace that currently holds tasks. */
+  listWorkspaces(): Promise<string[]>
   /** Read one task's current state. */
   get(id: BoardTask['id']): Promise<BoardTask>
   /** Claim a ready task. */
@@ -98,4 +100,37 @@ async function settle(ports: DispatchPorts, id: BoardTask['id'], run: SubagentRu
   const current = await ports.get(id)
   const status = result.stopReason === 'completed' ? 'review' : 'blocked'
   await ports.update({ id, revision: current.revision, status })
+}
+
+/** Options for one automatic pass over every board workspace. */
+export interface AutoOptions extends Omit<DispatchOptions, 'workspaceId' | 'workspacePath'> {
+  /** Repository path per workspace; required when worktrees are enabled. */
+  readonly workspacePath?: (workspaceId: string) => Promise<string | undefined> | string | undefined
+}
+
+/**
+ * Dispatch every workspace that currently holds tasks.
+ * @param ports - board and agent operations.
+ * @param options - provider, concurrency, isolation, and per-workspace paths.
+ * @returns the aggregated started and skipped task ids.
+ */
+export async function runAuto(ports: DispatchPorts, options: AutoOptions): Promise<DispatchOutcome> {
+  const started: string[] = []
+  const skipped: string[] = []
+  const { workspacePath, ...base } = options
+  for (const workspaceId of await ports.listWorkspaces()) {
+    let path: string | undefined
+    if (options.useWorktrees) {
+      path = workspacePath === undefined ? undefined : await workspacePath(workspaceId)
+      if (path === undefined) continue
+    }
+    const outcome = await runDispatch(ports, {
+      ...base,
+      workspaceId,
+      ...path === undefined ? {} : { workspacePath: path },
+    })
+    started.push(...outcome.started)
+    skipped.push(...outcome.skipped)
+  }
+  return { started, skipped }
 }

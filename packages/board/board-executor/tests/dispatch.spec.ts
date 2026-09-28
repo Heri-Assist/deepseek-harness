@@ -5,7 +5,7 @@ import { SessionId } from '@deepseek-ai/dsh-session'
 import type { SubagentRun, SubagentStartRequest } from '@deepseek-ai/dsh-subagent'
 import { WorkspaceId } from '@deepseek-ai/dsh-workspace'
 import { describe, expect, it } from 'vitest'
-import { runDispatch, type DispatchPorts } from '../src/dispatch.ts'
+import { runAuto, runDispatch, type DispatchPorts } from '../src/dispatch.ts'
 
 const WS = WorkspaceId('ws-1')
 
@@ -41,12 +41,18 @@ interface Recorder {
   readonly updates: BoardUpdateInput[]
 }
 
-function recorder(tasks: BoardTask[], resolve: (sessionId: SessionId) => Agent | undefined, stopReason = 'completed'): Recorder {
+function recorder(
+  tasks: BoardTask[],
+  resolve: (sessionId: SessionId) => Agent | undefined,
+  stopReason = 'completed',
+  workspaces: string[] = ['ws-1'],
+): Recorder {
   const claims: string[] = []
   const starts: SubagentStartRequest[] = []
   const updates: BoardUpdateInput[] = []
   const ports: DispatchPorts = {
     list: () => Promise.resolve(tasks),
+    listWorkspaces: () => Promise.resolve(workspaces),
     get: id => Promise.resolve(tasks.find(t => t.id === id) ?? task(String(id))),
     claim: (id) => {
       claims.push(String(id))
@@ -114,5 +120,32 @@ describe('runDispatch', () => {
     })
     await tick()
     expect(record.starts[0]?.cwd).toBe('/worktrees/a')
+  })
+})
+
+describe('runAuto', () => {
+  it('dispatches every board workspace', async () => {
+    const tasks = [task('a')]
+    const record = recorder(tasks, () => agent('parent'), 'completed', ['ws-1', 'ws-2'])
+    const outcome = await runAuto(record.ports, {
+      provider: 'test', maxConcurrent: 1, useWorktrees: false,
+      parent: agent('parent'), signal: new AbortController().signal,
+    })
+    await tick()
+    expect(outcome.started).toEqual([String(tasks[0]?.id), String(tasks[0]?.id)])
+  })
+
+  it('skips a workspace whose repository path is unknown when worktrees are on', async () => {
+    const tasks = [task('a')]
+    const record = recorder(tasks, () => agent('parent'), 'completed', ['known', 'unknown'])
+    const outcome = await runAuto(record.ports, {
+      provider: 'test', maxConcurrent: 1, useWorktrees: true,
+      parent: agent('parent'), signal: new AbortController().signal,
+      workspacePath: workspaceId => workspaceId === 'known' ? '/repo' : undefined,
+      createWorktree: () => Promise.resolve({ path: '/worktrees/a' }),
+    })
+    await tick()
+    expect(outcome.started).toEqual([String(tasks[0]?.id)])
+    expect(record.starts).toHaveLength(1)
   })
 })

@@ -566,6 +566,12 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
         returns: 'the matching tasks.',
       },
       {
+        signature: 'async workspaces(): Promise<WorkspaceId[]>',
+        description: 'List every workspace that currently holds at least one task.',
+        parameters: [],
+        returns: 'distinct workspace ids.',
+      },
+      {
         signature: 'update(input: BoardUpdateInput): Promise<BoardTask>',
         description: 'Replace the listed fields of one task under compare-and-set.',
         parameters: [{ name: 'input', description: 'task, expected revision, and replacement fields.' }],

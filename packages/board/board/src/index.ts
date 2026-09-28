@@ -10,6 +10,7 @@ import { randomUUID } from 'node:crypto'
 import z from '@deepseek-ai/schemastery'
 import { Context, Service } from '@deepseek-ai/cordis'
 import type { Domain } from '@deepseek-ai/dsh-storage-domain'
+import type { WorkspaceId } from '@deepseek-ai/dsh-workspace'
 import { registerBoardTools } from './tools.ts'
 import { boardDomain } from './schema.ts'
 import {
@@ -196,6 +197,14 @@ export class BoardService extends Service {
       return all.filter(task => isReady(task, byId))
     }
     return query.status === undefined ? all : all.filter(task => task.status === query.status)
+  }
+
+  /**
+   * List every workspace that currently holds at least one task.
+   * @returns distinct workspace ids.
+   */
+  async workspaces(): Promise<WorkspaceId[]> {
+    return [...new Set((await this.tasks()).map(task => task.workspaceId))]
   }
 
   /**

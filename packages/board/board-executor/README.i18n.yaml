@@ -15,11 +15,14 @@
   en: d152484eb41ac6b4
   zh: 5b6bd00fce5371c3
 /deepseek-ai-dsh-board-executor/use-this-package:
-  en: c1e8b92bf670d2d4
-  zh: 70fdf5dccb37876c
+  en: 95c6e4e3ad050982
+  zh: a485694f0d6f615f
 /deepseek-ai-dsh-board-executor/use-this-package/how-a-pass-resolves-a-parent:
-  en: 9d126a7f78bb2485
-  zh: 9d258a60e3901440
+  en: d5783597d63aa6fc
+  zh: 9f217d69d7c8d434
+/deepseek-ai-dsh-board-executor/use-this-package/automatic-dispatch:
+  en: 25b2b6c0b660b7a4
+  zh: 3bec47467c5e386c
 /deepseek-ai-dsh-board-executor/understand-the-implementation:
   en: 9313a98adb56ac97
   zh: 67ec6cf603f848ed
@@ -33,8 +36,8 @@
   en: 2a8f778dc162ce4c
   zh: 2a8f778dc162ce4c
 /deepseek-ai-dsh-board-executor/known-limitations-and-deferred-work:
-  en: 084f72ae8c1aff28
-  zh: 73e4846bb53cf889
+  en: 48f3e80fc17d3322
+  zh: 417f6a3d4132b00c
 /deepseek-ai-dsh-board-executor/known-limitations-and-deferred-work/dev-note:
   en: 0225ba087c5266f3
   zh: 53f5adbcc7db8671

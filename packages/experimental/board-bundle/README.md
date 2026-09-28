@@ -78,7 +78,7 @@ The six schemas change the request prefix once when the bundle mounts. Listing r
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- Dispatch is host-called: nothing runs a pass automatically on `board/changed` yet, so the board tools and the dispatcher are not wired to each other by this bundle.
+- This bundle mounts the board without automatic dispatch: set `auto: true` on the executor (with a provider) to drive ready tasks, or call `ctx.boardExecutor.dispatch` from a Host caller. The board tools and the dispatcher are not otherwise wired.
 - The dispatcher needs a live parent agent; a task whose creator session has ended is skipped until a caller supplies a parent.
 - No Web board UI ships with this bundle; the board is read and written through tools.
 

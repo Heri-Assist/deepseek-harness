@@ -49,6 +49,12 @@ get(id: BoardTaskId): Promise<BoardTask>
 async list(query: BoardListQuery): Promise<BoardTask[]>
 
 /**
+ * List every workspace that currently holds at least one task.
+ * @returns distinct workspace ids.
+ */
+async workspaces(): Promise<WorkspaceId[]>
+
+/**
  * Replace the listed fields of one task under compare-and-set.
  * @param input - task, expected revision, and replacement fields.
  * @returns the updated task.
@@ -80,6 +86,8 @@ complete(id: BoardTaskId, revision: number): Promise<BoardTask>
  */
 cancel(id: BoardTaskId, revision: number): Promise<BoardTask>
 ```
+
+Types: [WorkspaceId](workspace.zh.md)
 
 Source: [`packages/board/board/src/index.ts`](../../packages/board/board/src/index.ts)
 

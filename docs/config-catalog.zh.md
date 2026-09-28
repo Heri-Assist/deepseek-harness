@@ -437,7 +437,7 @@ export type Config = LocalConfig
 ## `@deepseek-ai/dsh-board`
 
 - `inject`: `storageDomain` · `tools`
-- `source`: [`packages/board/board/src/index.ts:52`](../packages/board/board/src/index.ts)
+- `source`: [`packages/board/board/src/index.ts:53`](../packages/board/board/src/index.ts)
 
 ```ts config-catalog
 /** Board configuration. */
@@ -469,6 +469,8 @@ export interface Config {
   worktreeRoot?: string
   /** Branch-name prefix for created worktrees; defaults to `board/`. */
   branchPrefix?: string
+  /** Dispatch automatically on every committed board change; defaults to false. */
+  auto?: boolean
 }
 ```
 <!-- END GENERATED config-catalog:@deepseek-ai/dsh-board-executor -->

@@ -42,12 +42,17 @@ Mount it beside [`@deepseek-ai/dsh-board`](../board/README.md) and a subagent pr
 | `useWorktrees` | `true` | Run each task in its own git worktree |
 | `worktreeRoot` | `$DSH_HOME/worktrees` | Directory holding created worktrees |
 | `branchPrefix` | `board/` | Branch-name prefix for created worktrees |
+| `auto` | `false` | Dispatch automatically on every committed board change |
 
 The generated [configuration catalog](../../../docs/config-catalog.md#deepseek-aidsh-board-executor) is the exhaustive source for the accepted fields.
 
 ### How a pass resolves a parent
 
 Each delegated run needs a parent Agent. A pass uses an explicit `parent` when the caller supplies one; otherwise it resolves the task's `createdBy` session through the agent registry. A task whose parent cannot be resolved is skipped, not failed.
+
+### Automatic dispatch
+
+With `auto: true` (which requires a configured `provider`), the executor subscribes to `board/changed` and drains one pass per board workspace, coalescing changes that arrive while a pass runs. It resolves each workspace's repository path from the workspace registry for worktree isolation, and skips a workspace with no registered path when worktrees are enabled.
 
 -----
 
@@ -92,7 +97,7 @@ Indirect: each child's cache behavior belongs to its own provider; the dispatche
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- Dispatch is host-called only: no model tool, command, or `board/changed` trigger starts a pass yet.
+- Automatic dispatch resolves each workspace's repository path from the workspace registry; a workspace with no registered path is skipped while worktrees are enabled. Without `auto`, dispatch is host-called only.
 - A finished worktree is kept for review and never merged; integration and cleanup are manual.
 - Write scopes are compared as exact strings; a glob-aware overlap check is deferred.
 - A failed or cancelled run marks its task `blocked`; there is no retry policy or attempt counter yet.

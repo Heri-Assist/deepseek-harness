@@ -42,12 +42,17 @@ kind: "package-reference"
 | `useWorktrees` | `true` | 让每个任务在自己的 git worktree 中运行 |
 | `worktreeRoot` | `$DSH_HOME/worktrees` | 存放所创建工作树的目录 |
 | `branchPrefix` | `board/` | 所创建工作树的分支名前缀 |
+| `auto` | `false` | 在每次已提交的看板变更时自动派发 |
 
 生成式[配置目录](../../../docs/config-catalog.zh.md#deepseek-aidsh-board-executor)是这些已接受字段的详尽来源。
 
 ### 一次派发如何解析父 agent
 
 每次委派运行都需要一个父 Agent。调用方提供显式 `parent` 时使用它；否则通过 agent 注册表解析任务的 `createdBy` 会话。无法解析父 agent 的任务会被跳过，而不是失败。
+
+### 自动派发
+
+开启 `auto: true`（需要配置 `provider`）后，executor 订阅 `board/changed`，为每个看板 workspace 排空一次派发，并合并派发运行期间到达的变更。它为 worktree 隔离从 workspace 注册表解析每个 workspace 的仓库路径，并在启用 worktrees 时跳过没有已注册路径的 workspace。
 
 -----
 
@@ -92,7 +97,7 @@ Indirect: each child's cache behavior belongs to its own provider; the dispatche
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- 派发只能由宿主调用：目前还没有模型工具、命令或 `board/changed` 触发来启动一次派发。
+- 自动派发从 workspace 注册表解析每个 workspace 的仓库路径；启用 worktrees 时会跳过没有已注册路径的 workspace。未开启 `auto` 时，派发只能由宿主调用。
 - 完成的工作树会保留以供审查，从不合并；集成与清理是手动的。
 - 写入范围按精确字符串比较；glob 感知的重叠检查被推迟。
 - 失败或取消的运行把任务置为 `blocked`；目前没有重试策略或尝试计数。

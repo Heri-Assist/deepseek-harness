@@ -78,7 +78,7 @@ kind: "package-bundle"
 
 <a id="known-limitations-and-deferred-work"></a>
 
-- 派发只能由宿主调用：目前还没有东西在 `board/changed` 时自动运行一次派发，因此本 Bundle 尚未把看板工具与派发器连接起来。
+- 本 Bundle 挂载看板但不启用自动派发：在 executor 上设置 `auto: true`（并配置 provider）来驱动就绪任务，或从宿主调用方调用 `ctx.boardExecutor.dispatch`。此外看板工具与派发器并无连接。
 - 派发器需要一个活动的父 agent；创建者会话已结束的任务会被跳过，直到调用方提供父 agent。
 - 本 Bundle 不提供 Web 看板 UI；看板通过工具读写。
 
