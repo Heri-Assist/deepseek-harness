@@ -1,0 +1,40 @@
+# Bilingual-pair consistency record for README.md (docs/i18n/README.md): per heading
+# section, a hash of its English and Chinese blocks outside code blocks and generated regions.
+# After editing either side, bring the other along and re-record with:
+#   pnpm run verify-translation-pairing --write packages/api/board-controller/README.md
+/:
+  en: 9a44f4cf19b55c55
+  zh: 4a6e36f5133fa57f
+/deepseek-ai-dsh-api-board-controller:
+  en: 1acb698b1ca1c126
+  zh: 5ffa43b706de1a97
+/deepseek-ai-dsh-api-board-controller/summary:
+  en: 2985aaffd5f839a7
+  zh: faacda0b7684172c
+/deepseek-ai-dsh-api-board-controller/table-of-contents:
+  en: d152484eb41ac6b4
+  zh: 5b6bd00fce5371c3
+/deepseek-ai-dsh-api-board-controller/use-this-package:
+  en: b63005fa8f45182d
+  zh: 572858a3353fe09b
+/deepseek-ai-dsh-api-board-controller/use-this-package/the-remote-methods:
+  en: 42852b88f80f68c7
+  zh: bf401d14b6d69272
+/deepseek-ai-dsh-api-board-controller/understand-the-implementation:
+  en: 8b1db90533807aa4
+  zh: 773b813bbdc37cef
+/deepseek-ai-dsh-api-board-controller/further-exploration:
+  en: 28fb61ebf3064f57
+  zh: 7b58519b001a4b00
+/deepseek-ai-dsh-api-board-controller/model-experience:
+  en: ac384b2e73359da9
+  zh: 866beebec90d857b
+/deepseek-ai-dsh-api-board-controller/model-experience/kv-cache-effect:
+  en: 8ef284048ddd76b3
+  zh: 8ef284048ddd76b3
+/deepseek-ai-dsh-api-board-controller/known-limitations-and-deferred-work:
+  en: 6c31a65f80784088
+  zh: 592103b1fe3e468a
+/deepseek-ai-dsh-api-board-controller/known-limitations-and-deferred-work/dev-note:
+  en: 0225ba087c5266f3
+  zh: 53f5adbcc7db8671

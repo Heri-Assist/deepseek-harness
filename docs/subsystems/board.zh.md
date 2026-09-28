@@ -91,6 +91,37 @@ Types: [WorkspaceId](workspace.zh.md)
 
 Source: [`packages/board/board/src/index.ts`](../../packages/board/board/src/index.ts)
 
+<a id="ctxboardcontroller--boardcontroller"></a>
+
+### `ctx.boardController` — `BoardController`
+
+Host service backing the generated `ctx.remote.board` namespace.
+
+```ts cordis-catalog
+/**
+ * List one workspace's tasks.
+ * @param request - workspace to read.
+ * @returns the board's tasks with derived readiness.
+ */
+@Remote('list') async list(request: BoardListRequest): Promise<BoardListValue>
+
+/**
+ * Create one task on a board.
+ * @param request - workspace, title, and optional fields.
+ * @returns the created task.
+ */
+@Remote('create') async create(request: BoardCreateRequest): Promise<BoardTaskValue>
+
+/**
+ * Change one task under compare-and-set.
+ * @param request - task, expected revision, and replacement fields.
+ * @returns the updated task.
+ */
+@Remote('update') async update(request: BoardUpdateRequest): Promise<BoardTaskValue>
+```
+
+Source: [`packages/api/board-controller/src/index.ts`](../../packages/api/board-controller/src/index.ts)
+
 <a id="ctxboardexecutor--boardexecutor"></a>
 
 ### `ctx.boardExecutor` — `BoardExecutor`

@@ -633,6 +633,13 @@ const SERVICE_ROLES: ServiceRole[] = [
     note: 'Plans ready, scope-disjoint tasks, claims them, and starts each as a delegated run, optionally isolated in a git worktree.',
   },
   {
+    key: 'boardController',
+    pkg: 'api-board-controller',
+    title: 'Board browser Remote owner',
+    mode: 'core',
+    note: 'Publishes the board Remote namespace for browser reads and compare-and-set writes over the board service.',
+  },
+  {
     key: 'goals',
     pkg: 'goal',
     title: 'Same-session goal domain',

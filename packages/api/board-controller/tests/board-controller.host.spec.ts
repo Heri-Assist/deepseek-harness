@@ -1,0 +1,68 @@
+/** The board Remote namespace a future Web Kanban surface calls. */
+import { Context } from '@deepseek-ai/cordis'
+import { remoteErrorOf, remoteMethods } from '@deepseek-ai/dsh-typert-protocol'
+import BoardService from '@deepseek-ai/dsh-board'
+import { DomainFacility } from '@deepseek-ai/dsh-storage-domain'
+import Storage from '@deepseek-ai/dsh-storage'
+import SystemPrompt from '@deepseek-ai/dsh-system-prompt'
+import ToolRuntime from '@deepseek-ai/dsh-tools'
+import { describe, expect, it } from 'vitest'
+import BoardController from '../src/index.ts'
+import { MemoryMediaPool, MemoryStorageBackend } from '../../../storage/storage-domain/tests/helpers/memory-backend.ts'
+
+async function boot(): Promise<Context> {
+  const ctx = new Context()
+  await ctx.plugin(SystemPrompt, {})
+  await ctx.plugin(ToolRuntime)
+  await ctx.plugin(Storage)
+  const pool = new MemoryMediaPool()
+  ctx.effect(() => ctx.storage.backend.register('fixture', new MemoryStorageBackend(pool)))
+  const facility = new DomainFacility(ctx, { backend: 'fixture' })
+  ctx.effect(() => {
+    const unmount = ctx.storage.mount('domain', facility)
+    ctx.provide('storageDomain', facility)
+    return () => { unmount() }
+  })
+  await ctx.plugin(BoardService, {})
+  await ctx.plugin(BoardController)
+  return ctx
+}
+
+describe('the board Remote namespace', () => {
+  it('publishes the board namespace from its own service key', async () => {
+    const ctx = await boot()
+    const binding = ctx.boardController.typertRemote
+    expect(binding.serviceKey).toBe('boardController')
+    expect(binding.namespace).toBe('board')
+    expect(remoteMethods(ctx.boardController)).toEqual([
+      { method: 'list', invocation: { kind: 'direct' } },
+      { method: 'create', invocation: { kind: 'direct' } },
+      { method: 'update', invocation: { kind: 'direct' } },
+    ])
+  })
+
+  it('reads a board with derived readiness after creating tasks', async () => {
+    const ctx = await boot()
+    const controller = ctx.boardController
+    const first = await controller.create({ workspaceId: 'ws-1', title: 'Design' })
+    const second = await controller.create({ workspaceId: 'ws-1', title: 'Implement', blockedBy: [first.id] })
+
+    expect(first.ready).toBe(true)
+    expect(second.ready).toBe(false)
+    const listed = await controller.list({ workspaceId: 'ws-1' })
+    expect(listed.tasks.map(task => task.title)).toEqual(['Design', 'Implement'])
+  })
+
+  it('surfaces a stale update as a bad-request Remote failure', async () => {
+    const ctx = await boot()
+    const task = await ctx.boardController.create({ workspaceId: 'ws-1', title: 'Ship' })
+    await ctx.boardController.update({ id: task.id, revision: task.revision, status: 'in_progress' })
+    let failure: unknown
+    try {
+      await ctx.boardController.update({ id: task.id, revision: task.revision, status: 'done' })
+    } catch (error: unknown) {
+      failure = error
+    }
+    expect(remoteErrorOf(failure)?.code).toBe('gateway/bad-request')
+  })
+})

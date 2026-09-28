@@ -188,6 +188,8 @@ flowchart LR
   svc_board["ctx.board<br/>Project-scoped task board"]
   pkg_board_executor["board-executor"]
   svc_boardExecutor["ctx.boardExecutor<br/>Board dispatch to delegated runs"]
+  pkg_api_board_controller["api-board-controller"]
+  svc_boardController["ctx.boardController<br/>Board browser Remote owner"]
   pkg_goal["goal"]
   svc_goals["ctx.goals<br/>Same-session goal domain"]
   pkg_ssh["ssh"]
@@ -288,6 +290,7 @@ flowchart LR
   pkg_agent_default_model --> svc_agentDefaultModel
   pkg_agent_loop --> svc_agentLoop
   pkg_agent_preset_registry --> svc_agentPresets
+  pkg_api_board_controller --> svc_boardController
   pkg_api_gateway --> svc_typertGateway
   pkg_api_job_controller --> svc_jobController
   pkg_api_session_controller --> svc_sessionController
@@ -656,6 +659,7 @@ flowchart LR
 | `ctx.memory` | `core` | [`memory`](../packages/memory/memory) | - | - | - | 拥有 `$DSH_HOME` 下的单个 FTS5 存储，并注册 remember、recall 与 forget 工具。 |
 | `ctx.board` | `core` | [`board`](../packages/board/board) | - | - | - | 拥有每个 workspace 的持久任务，从依赖边推导就绪状态，并注册看板工具。 |
 | `ctx.boardExecutor` | `core` | [`board-executor`](../packages/board/board-executor) | - | [`board`](../packages/board/board) | - | 规划就绪且 scope 不相交的任务，认领它们，并把每个任务启动为委派运行，可选隔离在 git worktree 中。 |
+| `ctx.boardController` | `core` | [`api-board-controller`](../packages/api/board-controller) | - | - | - | 发布看板 Remote namespace，供浏览器在 board 服务之上读取与 compare-and-set 写入。 |
 | `ctx.goals` | `core` | [`goal`](../packages/goal/goal) | - | - | - | 从会话日志折叠带修订版本的目标状态，并将实时延续激活保留在进程本地。 |
 | `ctx.ssh` | `core` | [`ssh`](../packages/ssh/ssh) | - | [`fs-ssh`](../packages/ssh/fs-ssh), [`subprocess-ssh`](../packages/ssh/subprocess-ssh), [`sandbox-ssh`](../packages/ssh/sandbox-ssh) | - | 负责一条经过认证的 OpenSSH 连接、已安装辅助程序身份、独立程序流，以及配套远端提供方的断连清理。 |
 | `ctx.subprocess` | `seam` | [`subprocess`](../packages/subprocess/subprocess) | [`subprocess-local`](../packages/subprocess/subprocess-local), [`subprocess-ssh`](../packages/ssh/subprocess-ssh) | [`bash-local`](../packages/shell/bash-local), [`bash-sandbox`](../packages/shell/bash-sandbox), [`terminal-bash`](../packages/terminal/terminal-bash), [`lsp-stdio`](../packages/lsp/lsp-stdio), [`subagent-acp`](../packages/subagent/subagent-acp), [`subagent-codex`](../packages/subagent/subagent-codex), [`subagent-claude-code`](../packages/subagent/subagent-claude-code) | - | Bash 执行器、PTY shell 后端、LSP Host，以及进程外 ACP、Codex 和 Claude Code subagent 后端都通过 ctx.subprocess 执行 spawn；该服务负责进程坐标、进程树／会话生命周期、stdio 处置、终端机制和 kill 升级。 |

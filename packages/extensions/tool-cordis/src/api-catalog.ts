@@ -598,6 +598,31 @@ export const SERVICE_API: readonly ServiceApiEntry[] = [
     ],
   },
   {
+    key: 'boardController',
+    summary: 'Host service backing the generated `ctx.remote.board` namespace.',
+    description: 'Host service backing the generated `ctx.remote.board` namespace.',
+    methods: [
+      {
+        signature: '@Remote(\'list\') async list(request: BoardListRequest): Promise<BoardListValue>',
+        description: 'List one workspace\'s tasks.',
+        parameters: [{ name: 'request', description: 'workspace to read.' }],
+        returns: 'the board\'s tasks with derived readiness.',
+      },
+      {
+        signature: '@Remote(\'create\') async create(request: BoardCreateRequest): Promise<BoardTaskValue>',
+        description: 'Create one task on a board.',
+        parameters: [{ name: 'request', description: 'workspace, title, and optional fields.' }],
+        returns: 'the created task.',
+      },
+      {
+        signature: '@Remote(\'update\') async update(request: BoardUpdateRequest): Promise<BoardTaskValue>',
+        description: 'Change one task under compare-and-set.',
+        parameters: [{ name: 'request', description: 'task, expected revision, and replacement fields.' }],
+        returns: 'the updated task.',
+      },
+    ],
+  },
+  {
     key: 'boardExecutor',
     summary: 'Dispatch ready tasks on a board to delegated runs.',
     description: 'Dispatch ready tasks on a board to delegated runs.',
@@ -4798,8 +4823,20 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface BoardCreateInput {\n    readonly workspaceId: WorkspaceId;\n    readonly title: string;\n    readonly description?: string;\n    readonly priority?: BoardPriority;\n    readonly labels?: readonly string[];\n    readonly blockedBy?: readonly BoardTaskId[];\n    readonly writeScopes?: readonly string[];\n    readonly createdBy?: SessionId;\n}',
   },
   {
+    name: 'BoardCreateRequest',
+    declaration: 'export interface BoardCreateRequest {\n    readonly workspaceId: string;\n    readonly title: string;\n    readonly description?: string;\n    readonly priority?: BoardPriority;\n    readonly labels?: readonly string[];\n    readonly blockedBy?: readonly string[];\n    readonly writeScopes?: readonly string[];\n}',
+  },
+  {
     name: 'BoardListQuery',
     declaration: 'export interface BoardListQuery {\n    readonly workspaceId: WorkspaceId;\n    readonly status?: BoardTaskStatus;\n    readonly readyOnly?: boolean;\n}',
+  },
+  {
+    name: 'BoardListRequest',
+    declaration: 'export interface BoardListRequest {\n    readonly workspaceId: string;\n}',
+  },
+  {
+    name: 'BoardListValue',
+    declaration: 'export interface BoardListValue {\n    readonly tasks: readonly BoardTaskValue[];\n}',
   },
   {
     name: 'BoardPriority',
@@ -4818,8 +4855,16 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export type BoardTaskStatus = \'backlog\' | \'in_progress\' | \'review\' | \'done\' | \'cancelled\' | \'blocked\';',
   },
   {
+    name: 'BoardTaskValue',
+    declaration: 'export interface BoardTaskValue {\n    readonly id: string;\n    readonly workspaceId: string;\n    readonly revision: number;\n    readonly title: string;\n    readonly description?: string;\n    readonly priority: BoardPriority;\n    readonly labels: readonly string[];\n    readonly status: BoardTaskStatus;\n    readonly blockedBy: readonly string[];\n    readonly writeScopes: readonly string[];\n    readonly ready: boolean;\n    readonly createdAt: string;\n    readonly updatedAt: string;\n}',
+  },
+  {
     name: 'BoardUpdateInput',
     declaration: 'export interface BoardUpdateInput {\n    readonly id: BoardTaskId;\n    readonly revision: number;\n    readonly title?: string;\n    readonly description?: string;\n    readonly priority?: BoardPriority;\n    readonly labels?: readonly string[];\n    readonly status?: BoardTaskStatus;\n    readonly blockedBy?: readonly BoardTaskId[];\n    readonly writeScopes?: readonly string[];\n    readonly assignee?: BoardAssignee;\n}',
+  },
+  {
+    name: 'BoardUpdateRequest',
+    declaration: 'export interface BoardUpdateRequest {\n    readonly id: string;\n    readonly revision: number;\n    readonly title?: string;\n    readonly description?: string;\n    readonly priority?: BoardPriority;\n    readonly labels?: readonly string[];\n    readonly status?: BoardTaskStatus;\n    readonly blockedBy?: readonly string[];\n    readonly writeScopes?: readonly string[];\n}',
   },
   {
     name: 'Branded',
