@@ -2158,7 +2158,7 @@ export interface Config {
 
 - `inject`: `memory` · `agents` · `sessionProjections`
 - `refs`: [`MemoryScope`](../packages/memory/memory/src/index.ts)
-- `source`: [`packages/memory/memory-context/src/index.ts:68`](../packages/memory/memory-context/src/index.ts)
+- `source`: [`packages/memory/memory-context/src/index.ts:65`](../packages/memory/memory-context/src/index.ts)
 
 ```ts config-catalog
 /** Automatic recall configuration. Invalid values fail plugin load. */
